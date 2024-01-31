@@ -1,19 +1,20 @@
 // Import section
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Button, TextInput, Image, Alert, TouchableOpacity, Touchable, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, Button, TextInput, Image, Alert, TouchableOpacity, Touchable, ActivityIndicator, SafeAreaView } from 'react-native';
 import { app, db, storage, auth, database } from '../firebase';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import uuid from "uuid";
+import { FontAwesome } from '@expo/vector-icons';
 
 // Export ProfileScreen
 export default function ProfileScreen({ navigation }) {
   // Declaration of functional components
   // user, profile data, image, is loading
   const user = auth.currentUser;
-  const [profileData, setProfileData] = useState({ firstName: '', lastName: '', country: '', photoURL: '' });
+  const [profileData, setProfileData] = useState({ firstName: '', lastName: '', photoURL: '' });
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -137,20 +138,28 @@ export default function ProfileScreen({ navigation }) {
 
   // return block
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      {/* Header container */}
+      <View style={styles.headerContainer}>
+        <View style={styles.userInfo}>
+          <Text style={styles.name}>{profileData.firstName} {profileData.lastName}</Text>
+          <Text style={styles.email}>{user.email}</Text>
+          {/* Display the task counts here */}
+        </View>
 
-      {/* Image Display and Picker */}
-      <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : profileData.photoURL ? (
-          <Image source={{ uri: profileData.photoURL }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.profileImagePlaceholder}>
-            <MaterialIcons name="file-upload" size={40} color="grey" />
-          </View>
-        )}
-      </TouchableOpacity>
+        {/* Image Display and Picker */}
+        <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : profileData.photoURL ? (
+            <Image source={{ uri: profileData.photoURL }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.profileImagePlaceholder}>
+              <MaterialIcons name="file-upload" size={40} color="grey" />
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
 
       {/* Profile Fields */}
       <View style={styles.inputGroup}>
@@ -177,18 +186,6 @@ export default function ProfileScreen({ navigation }) {
           placeholder="Last Name"
         />
       </View>
-      <View style={styles.inputGroup}>
-        {/* Country input area */}
-        <Text style={styles.label}>Country</Text>
-        <TextInput
-          style={styles.input}
-          value={profileData.country}
-          onChangeText={(text) =>
-            setProfileData({ ...profileData, country: text })
-          }
-          placeholder="Country"
-        />
-      </View>
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
@@ -212,6 +209,9 @@ export default function ProfileScreen({ navigation }) {
           <MaterialIcons name="logout" size={20} color="#FFF" />
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.logoutDeleteContainer}>
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={handleDeleteAccount}
@@ -220,7 +220,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.buttonText}>Delete Account</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -231,7 +231,31 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#0080FF',
+    backgroundColor: '#0080FF', 
+  },
+  // Header container style
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 20,
+  },
+  userInfo: {
+    flex: 1,
+    justifyContent: 'center',
+
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#FFFFFF'
+  },
+  email: {
+    fontSize: 18,
+    color: '#FFFFFF'
   },
   // Image container style
   imageContainer: {
@@ -269,16 +293,17 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 5,
     marginLeft: 20,
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
   // Input style
   input: {
     width: '90%',
     alignSelf: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: '#94c6f7',
+    color: '#FFFFFF',
   },
   // Button container style
   buttonContainer: {
@@ -288,24 +313,26 @@ const styles = StyleSheet.create({
   },
   // Logout delete container style
   logoutDeleteContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    flexDirection: 'column',
+    padding: 10,
+    // justifyContent: 'space-evenly',
     width: '100%',
     marginTop: 10,
+
   },
   // Logout button style
   logoutButton: {
     flexDirection: 'row',
     backgroundColor: '#D32F2F',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 20,
   },
   // delete account style
   deleteButton: {
     flexDirection: 'row',
     backgroundColor: '#F44336',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 20,
   },
   // button text style
   buttonText: {
