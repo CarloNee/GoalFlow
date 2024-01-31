@@ -242,17 +242,20 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 20,
   },
+  // User info style
   userInfo: {
     flex: 1,
     justifyContent: 'center',
 
   },
+  // User name style
   name: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
     color: '#FFFFFF'
   },
+  // User email style
   email: {
     fontSize: 18,
     color: '#FFFFFF'
