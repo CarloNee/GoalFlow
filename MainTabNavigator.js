@@ -69,7 +69,7 @@ export default function MainTabNavigator() {
       {/* Notes */}
       <Tab.Screen name="Notes" component={NotesScreen} />
       {/* Profile */}
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }}/>
     </Tab.Navigator>
   );
 }
