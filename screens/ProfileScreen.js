@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import uuid from "uuid";
 import { FontAwesome } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 // Export ProfileScreen
 export default function ProfileScreen({ navigation }) {
@@ -136,18 +137,18 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  // Get the app version from the app manifest
+  const appVersion = Constants.expoConfig.version;
+
   // return block
   return (
     <SafeAreaView style={styles.container}>
       {/* Header container */}
       <View style={styles.headerContainer}>
         <View style={styles.userInfo}>
-          <Text style={styles.name}>{profileData.firstName} {profileData.lastName}</Text>
+          <Text style={styles.name}>{`${profileData.firstName} ${profileData.lastName}`}</Text>
           <Text style={styles.email}>{user.email}</Text>
-          {/* Display the task counts here */}
         </View>
-
-        {/* Image Display and Picker */}
         <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" color="#0000ff" />
@@ -155,7 +156,7 @@ export default function ProfileScreen({ navigation }) {
             <Image source={{ uri: profileData.photoURL }} style={styles.profileImage} />
           ) : (
             <View style={styles.profileImagePlaceholder}>
-              <MaterialIcons name="file-upload" size={40} color="grey" />
+              <FontAwesome name="user-circle-o" size={60} color="grey" />
             </View>
           )}
         </TouchableOpacity>
@@ -220,6 +221,9 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.buttonText}>Delete Account</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>App Version: {appVersion}</Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -229,121 +233,147 @@ const styles = StyleSheet.create({
   // Container style
   container: {
     flex: 1,
+    backgroundColor: '#f7f7f7',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#0080FF', 
+    justifyContent: 'flex-start',
+    
   },
   // Header container style
   headerContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 15,
     alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
-    paddingVertical: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   // User info style
   userInfo: {
     flex: 1,
-    justifyContent: 'center',
-
   },
-  // User name style
+  // Name style
   name: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#FFFFFF'
+    color: '#333',
+    fontFamily: 'System',
   },
-  // User email style
+  // Email style
   email: {
-    fontSize: 18,
-    color: '#FFFFFF'
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'System',
   },
-  // Image container style
+  // Profile Image style
   imageContainer: {
-    marginBottom: 20,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  // Profile picture style
+  // Profile image style
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#dddddd',
+    width: '100%',
+    height: '100%',
   },
-  // Image placeholder style
+  // Profile image placeholder style
   profileImagePlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#dddddd',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#e1e1e1',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // text style for changing photo
-  changePhotoText: {
-    color: '#FFF',
-    marginTop: 8,
-  },
-  // input style for the input sections
+  // Input areas style
   inputGroup: {
     width: '100%',
-    marginBottom: 15,
+    marginVertical: 10,
   },
   // Label style
   label: {
+    fontSize: 14,
     color: '#333',
     marginBottom: 5,
-    marginLeft: 20,
-    color: '#FFFFFF',
-    textAlign: 'center',
+    paddingHorizontal: 20,
+    fontFamily: 'System',
   },
   // Input style
   input: {
-    width: '90%',
-    alignSelf: 'center',
-    padding: 10,
-    borderRadius: 20,
-    backgroundColor: '#94c6f7',
-    color: '#FFFFFF',
+    height: 50,
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    borderRadius: 5,
+    fontSize: 16,
+    fontFamily: 'System',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   // Button container style
   buttonContainer: {
-    marginTop: 20,
-    width: '90%',
-    alignSelf: 'center',
-  },
-  // Logout delete container style
-  logoutDeleteContainer: {
-    flexDirection: 'column',
-    padding: 10,
-    // justifyContent: 'space-evenly',
-    width: '100%',
     marginTop: 10,
-
+    paddingHorizontal: 20,
+    width: '100%',
+  },
+  // Logout / delete container style
+  logoutDeleteContainer: {
+    width: '100%',
+    marginTop: 20,
+    paddingHorizontal: 20,
   },
   // Logout button style
   logoutButton: {
-    flexDirection: 'row',
     backgroundColor: '#D32F2F',
-    padding: 10,
-    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  // delete account style
+  // Delete button style
   deleteButton: {
-    flexDirection: 'row',
     backgroundColor: '#F44336',
-    padding: 10,
-    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    borderRadius: 25,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  // button text style
+  // Button text style
   buttonText: {
     color: '#FFF',
-    marginLeft: 5,
+    fontSize: 16,
+    fontFamily: 'System',
   },
   // text style
   textStyle: {
     color: '#333',
-  }
+  },
+  // Version container style
+  versionContainer: {
+    position: 'absolute', 
+    bottom: 10, 
+    width: '100%', 
+    alignItems: 'center', 
+  },
+  // Version text style
+  versionText: {
+    fontSize: 14, 
+    color: '#a1a1a1', 
+  },
 });
