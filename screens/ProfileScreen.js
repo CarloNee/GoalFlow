@@ -137,7 +137,8 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  // Get the app version from the app manifest
+  // Retrieving the app version on expoConfig.version 
+  // want it to show 'App Version: 1.1.1' as an example
   const appVersion = Constants.expoConfig.version;
 
   // return block
@@ -146,14 +147,22 @@ export default function ProfileScreen({ navigation }) {
       {/* Header container */}
       <View style={styles.headerContainer}>
         <View style={styles.userInfo}>
-          <Text style={styles.name}>{`${profileData.firstName} ${profileData.lastName}`}</Text>
+          <Text
+            style={styles.name}
+          >{`${profileData.firstName} ${profileData.lastName}`}</Text>
           <Text style={styles.email}>{user.email}</Text>
         </View>
-        <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
+        <TouchableOpacity
+          onPress={handleImagePick}
+          style={styles.imageContainer}
+        >
           {isLoading ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : profileData.photoURL ? (
-            <Image source={{ uri: profileData.photoURL }} style={styles.profileImage} />
+            <Image
+              source={{ uri: profileData.photoURL }}
+              style={styles.profileImage}
+            />
           ) : (
             <View style={styles.profileImagePlaceholder}>
               <FontAwesome name="user-circle-o" size={60} color="grey" />
@@ -191,36 +200,38 @@ export default function ProfileScreen({ navigation }) {
       {/* Buttons */}
       <View style={styles.buttonContainer}>
         {/* Save profile button */}
-        <Button
-          title="Save Profile"
-          onPress={handleSaveProfile}
-          color="#add8e6"
-        />
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+            <MaterialIcons name="save" size={20} color="#FFF" />
+            <Text style={styles.buttonText}>Save Profile</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* preferences button */}
-        <Button
+        {/* <Button
           title="Preferences"
           onPress={() => navigation.navigate("Preferences")}
           color="#add8e6"
-        />
+        /> */}
       </View>
 
-      {/* Logout and Delete Account */}
-      <View style={styles.logoutDeleteContainer}>
+      {/* Logout Account Button */}
+      <View style={styles.logoutContainer}>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <MaterialIcons name="logout" size={20} color="#FFF" />
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.logoutDeleteContainer}>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeleteAccount}
-        >
-          <MaterialIcons name="delete" size={20} color="#FFF" />
-          <Text style={styles.buttonText}>Delete Account</Text>
+      {/* Delete Account Button */}
+      <View style={styles.deleteButtonContainer}>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
+          <MaterialIcons name="delete" size={20} color="red" />
+          <Text style={styles.deleteButtonText}>Delete Account</Text>
         </TouchableOpacity>
       </View>
+
+      {/* App Version: Container to show the app version pulled from expoConfig */}
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>App Version: {appVersion}</Text>
       </View>
@@ -253,14 +264,14 @@ const styles = StyleSheet.create({
   },
   // Name style
   name: {
-    fontSize: 22,
+    fontSize: 27,
     fontWeight: 'bold',
     color: '#333',
     fontFamily: 'System',
   },
   // Email style
   email: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
     fontFamily: 'System',
   },
@@ -319,14 +330,20 @@ const styles = StyleSheet.create({
   },
   // Button container style
   buttonContainer: {
-    marginTop: 10,
-    paddingHorizontal: 20,
+    margin: 10,
     width: '100%',
   },
-  // Logout / delete container style
-  logoutDeleteContainer: {
+  // Logout container style
+  logoutContainer: {
     width: '100%',
     marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  // delete button container
+  deleteButtonContainer: {
+    position: 'absolute',
+    bottom: 50, // Adjust the distance from the bottom
+    width: '100%',
     paddingHorizontal: 20,
   },
   // Logout button style
@@ -341,18 +358,38 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  // Delete button style
-  deleteButton: {
-    backgroundColor: '#F44336',
+  saveButton: {
+    backgroundColor: '#0080FF',
     justifyContent: 'center',
     alignItems: 'center',
     height: 50,
     borderRadius: 25,
-    marginTop: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+  },
+  // Delete button style
+  deleteButton: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    borderRadius: 25,
+    flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  // Delete button text style
+  deleteButtonText: {
+    marginLeft: 10,
+    color: 'red',
+    fontSize: 16,
+    fontFamily: 'System',
   },
   // Button text style
   buttonText: {

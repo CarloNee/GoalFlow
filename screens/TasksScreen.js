@@ -208,7 +208,7 @@ export default function TasksScreen({ navigation }) {
           Good {getPartOfDay()}, {profileData?.firstName || "User"}
         </Text>
         {/* display how many tasks user has currently */}
-        <Text style={styles.taskCountText}>You have {tasks.length} tasks currently</Text>
+        <Text style={styles.taskCountText}>You have {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} currently</Text>
       </View>
       {loading ? (
         // Task loading indicator if no tasks entered
