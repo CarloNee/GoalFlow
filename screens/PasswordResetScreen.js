@@ -31,6 +31,11 @@ export default function PasswordResetScreen() {
       });
   };
 
+  // function to handle navigation to LoginScreen
+  const navigateToLogin = () => {
+    navigation.navigate('Login');
+  };
+
   // return block
   return (
     <View style={styles.container}>
@@ -46,6 +51,7 @@ export default function PasswordResetScreen() {
       <TextInput
         style={styles.input}
         placeholder="Enter your email"
+        placeholderTextColor= "#FFFFFF"
         value={email}
         onChangeText={setEmail}
       />
@@ -57,6 +63,10 @@ export default function PasswordResetScreen() {
           <Text style={styles.buttonText}>Send Reset Email</Text>
         </TouchableOpacity>
       )}
+
+        <TouchableOpacity onPress={navigateToLogin}>
+          <Text style={styles.linkText}>Back to Login</Text>
+        </TouchableOpacity>
     </View>
   );
 }
@@ -94,6 +104,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     color: "#FFFFFF",
     textAlign: "center",
+    
   },
   // Button style
   button: {
@@ -110,5 +121,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
+  },
+  // back to login link text style
+  linkText: {
+    marginTop: 15,
+    color: "#FFFFFF",
+    textDecorationLine: 'underline',
   },
 });

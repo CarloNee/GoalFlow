@@ -5,6 +5,7 @@ import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Export NotesScreen
 export default function NotesScreen({ navigation }) {
@@ -110,7 +111,7 @@ export default function NotesScreen({ navigation }) {
 
   // return block
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* If loading, display loading - need to change to Activity Indicator */}
       {loading ? <Text>Loading...</Text> : (
         // displat FlatList for all the notes in their own container
@@ -127,7 +128,7 @@ export default function NotesScreen({ navigation }) {
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

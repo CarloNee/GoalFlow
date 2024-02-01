@@ -67,7 +67,7 @@ export default function MainTabNavigator() {
         }} 
       />
       {/* Notes */}
-      <Tab.Screen name="Notes" component={NotesScreen} />
+      <Tab.Screen name="Notes" component={NotesScreen} options={{ headerShown: false }}/>
       {/* Profile */}
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }}/>
     </Tab.Navigator>

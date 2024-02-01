@@ -1,6 +1,6 @@
 // Import Section
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, TextInput, Button, ActivityIndicator, Alert, Image, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TextInput, Button, ActivityIndicator, Alert, Image, Text, TouchableOpacity,KeyboardAvoidingView } from 'react-native';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth'; 
 
