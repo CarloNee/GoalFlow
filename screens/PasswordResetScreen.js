@@ -65,7 +65,7 @@ export default function PasswordResetScreen() {
       )}
 
         <TouchableOpacity onPress={navigateToLogin}>
-          <Text style={styles.linkText}>Back to Login</Text>
+          <Text style={styles.linkText}>Return to Login</Text>
         </TouchableOpacity>
     </View>
   );
