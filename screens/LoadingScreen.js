@@ -1,23 +1,33 @@
 // Import section
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import * as Font from 'expo-font';
 
 // function Loading Screen
 const LoadingScreen = () => {
-  // Fade in the logo
-  const fadeAnim = useRef(new Animated.Value(0)).current; 
-  // Navigate
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
-  // Auth for user
   const auth = getAuth();
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // Function to preload fonts
+  const loadFonts = async () => {
+    await Font.loadAsync({
+      'FiraSans-ExtraBoldItalic': require('../assets/fonts/FiraSans-ExtraBoldItalic.ttf'),
+    });
+    setFontsLoaded(true);
+  };
 
   useEffect(() => {
-    // Start fading in the logo - using Animated from 'react-native'
+    // Load fonts
+    loadFonts();
+
+    // Start fading in the logo
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 1000, 
+      duration: 1000,
       useNativeDriver: true,
     }).start();
 
@@ -34,11 +44,19 @@ const LoadingScreen = () => {
       });
     }, 1500);
 
-    // Clean up the listener and timeout
     return () => {
       clearTimeout(timeout);
     };
   }, [fadeAnim, navigation, auth]);
+
+  // Return a loading indicator if fonts are not loaded yet
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.centeredContainer}>
+        <ActivityIndicator size="large" color="#FFFFFF" />
+      </View>
+    );
+  }
 
   // return block
   return (
@@ -46,7 +64,6 @@ const LoadingScreen = () => {
       {/* Logo */}
       <Animated.View style={{ ...styles.logoContainer, opacity: fadeAnim }}>
         <Image source={require('../assets/logo.png')} style={styles.logo} />
-        {/* Spinning Activity Indicator */}
         <ActivityIndicator size="large" color="#FFFFFF" />
       </Animated.View>
     </View>

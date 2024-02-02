@@ -15,13 +15,8 @@ export default function NotesScreen({ navigation }) {
   const [notes, setNotes] = useState([]);
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
-  // const [fontsLoaded, setFontsLoaded] = useState(false);
   const screenWidth = Dimensions.get('window').width;
 
-  // If load font
-  const [fontsLoaded] = useFonts({
-    'FiraSans-ExtraBoldItalic': require('../assets/fonts/FiraSans-ExtraBoldItalic.ttf'),
-  });
 
   // if user is auth'ed, display notes
   useFocusEffect(
@@ -72,7 +67,6 @@ export default function NotesScreen({ navigation }) {
       headerStyle: {
         backgroundColor: '#0080FF',
         borderBottomWidth: 0,
-        height: 50,
       },
       headerTitleContainerStyle: {
         left: 0,
