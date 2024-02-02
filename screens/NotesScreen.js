@@ -23,11 +23,6 @@ export default function NotesScreen({ navigation }) {
     'FiraSans-ExtraBoldItalic': require('../assets/fonts/FiraSans-ExtraBoldItalic.ttf'),
   });
 
-  // If font not loaded, display loading
-  if (!fontsLoaded) {
-    return <ActivityIndicator />;
-  }
-
   // if user is auth'ed, display notes
   useFocusEffect(
     React.useCallback(() => {
@@ -73,7 +68,7 @@ export default function NotesScreen({ navigation }) {
 
     navigation.setOptions({
       headerTitle: () => (
-        <Text style={styles.headerTitleText}>Notes</Text>
+        <Text>Notes</Text>
       ),
       headerStyle: {
         backgroundColor: '#0080FF',
@@ -213,12 +208,6 @@ const styles = StyleSheet.create({
     fontFamily: 'FiraSans-ExtraBoldItalic.ttf',
     fontSize: 24,
     color: '#fff',
-  },
-  headerTitlteText: {
-    textAlign: 'center',
-    fontFamily: 'FiraSans-ExtraBoldItalic.ttf',
-    fontSize: 24,
-    color: '#fff'
   },
   // Profile image style
   profileImage: {
