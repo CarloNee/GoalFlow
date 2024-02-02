@@ -1,16 +1,32 @@
 // Import Section
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, Image, Dimensions, Animated, ActivityIndicator } from "react-native";
 import { db, auth } from '../firebase';
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, deleteDoc, addDoc, getDoc } from "firebase/firestore";
+import { MaterialIcons } from "@expo/vector-icons";
+// import { useFonts, FiraSans_800ExtraBold_Italic } from '@expo-google-fonts/fira-sans';
 import { useFocusEffect } from '@react-navigation/native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Font from 'expo-font';
+import { useFonts } from 'expo-font';
 
 // Export NotesScreen
 export default function NotesScreen({ navigation }) {
   const [notes, setNotes] = useState([]);
+  const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const screenWidth = Dimensions.get('window').width;
+
+  // If load font
+  const [fontsLoaded] = useFonts({
+    'FiraSans-ExtraBoldItalic': require('../assets/fonts/FiraSans-ExtraBoldItalic.ttf'),
+  });
+
+  // If font not loaded, display loading
+  if (!fontsLoaded) {
+    return <ActivityIndicator />;
+  }
 
   // if user is auth'ed, display notes
   useFocusEffect(
@@ -21,6 +37,56 @@ export default function NotesScreen({ navigation }) {
       return () => {}; 
     }, [])
   );
+
+  // Function to fetch user profile data
+  const fetchUserProfile = async () => {
+    const docRef = doc(db, "users", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setProfileData(docSnap.data());
+    }
+  };
+
+  // useLayoutEffect for header
+  React.useLayoutEffect(() => {
+    fetchUserProfile();
+    navigation.setOptions({
+      headerRight: () => (
+        profileData?.photoURL ? (
+          <Image
+            source={{ uri: profileData.photoURL }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+        ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
+      ),
+      headerRightContainerStyle: {
+        paddingRight: 10,
+      },
+    });
+  }, [navigation, profileData]);
+
+  // header options
+  React.useLayoutEffect(() => {
+    const logoWidth = screenWidth * 0.5;
+    const logoHeight = (logoWidth * 424) / 1500; 
+    const headerHeight = logoHeight + 60; 
+
+    navigation.setOptions({
+      headerTitle: () => (
+        <Text style={styles.headerTitleText}>Notes</Text>
+      ),
+      headerStyle: {
+        backgroundColor: '#0080FF',
+        borderBottomWidth: 0,
+        height: headerHeight,
+      },
+      headerTitleContainerStyle: {
+        left: 0,
+        right: 0,
+      },
+      headerShadowVisible: false,
+    });
+  }, [navigation]);  
 
   // function for fetching notes
   const fetchNotes = async () => {
@@ -140,6 +206,35 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 10,
     backgroundColor: '#0080FF', 
+  },
+  // Header title style
+  headerTitle: {
+    textAlign: 'center',
+    fontFamily: 'FiraSans-ExtraBoldItalic.ttf',
+    fontSize: 24,
+    color: '#fff',
+  },
+  headerTitlteText: {
+    textAlign: 'center',
+    fontFamily: 'FiraSans-ExtraBoldItalic.ttf',
+    fontSize: 24,
+    color: '#fff'
+  },
+  // Profile image style
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  // Header right container style
+  headerRightContainer: {
+    paddingRight: 10,
+  },
+  // Header title container style
+  headerTitleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   // Note item style
   noteItem: {

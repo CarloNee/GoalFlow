@@ -52,7 +52,7 @@ export default function MainTabNavigator() {
     >
       {/* Tabs used for different screens */}
       {/* Tasks */}
-      <Tab.Screen name="Tasks" component={TasksScreen} />
+      <Tab.Screen name="Tasks" component={TasksScreen} options={{ headerShown: true }}/>
       {/* Completed */}
       <Tab.Screen name="Completed" component={CompletedScreen} />
       {/* Add Task */}
@@ -67,7 +67,7 @@ export default function MainTabNavigator() {
         }} 
       />
       {/* Notes */}
-      <Tab.Screen name="Notes" component={NotesScreen} options={{ headerShown: false }}/>
+      <Tab.Screen name="Notes" component={NotesScreen} options={{ headerShown: true }}/>
       {/* Profile */}
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }}/>
     </Tab.Navigator>
