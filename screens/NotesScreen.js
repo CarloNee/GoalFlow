@@ -4,18 +4,18 @@ import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, Image, Dimen
 import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, doc, deleteDoc, addDoc, getDoc } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
-// import { useFonts, FiraSans_800ExtraBold_Italic } from '@expo-google-fonts/fira-sans';
+import { useFonts, FiraSans_800ExtraBold_Italic } from '@expo-google-fonts/fira-sans';
 import { useFocusEffect } from '@react-navigation/native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Font from 'expo-font';
-import { useFonts } from 'expo-font';
 
 // Export NotesScreen
 export default function NotesScreen({ navigation }) {
   const [notes, setNotes] = useState([]);
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  // const [fontsLoaded, setFontsLoaded] = useState(false);
   const screenWidth = Dimensions.get('window').width;
 
   // If load font
@@ -50,7 +50,7 @@ export default function NotesScreen({ navigation }) {
         profileData?.photoURL ? (
           <Image
             source={{ uri: profileData.photoURL }}
-            style={{ width: 40, height: 40, borderRadius: 20 }}
+            style={{ width: 50, height: 50, borderRadius: 25 }}
           />
         ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
       ),
@@ -64,16 +64,15 @@ export default function NotesScreen({ navigation }) {
   React.useLayoutEffect(() => {
     const logoWidth = screenWidth * 0.5;
     const logoHeight = (logoWidth * 424) / 1500; 
-    const headerHeight = logoHeight + 60; 
 
     navigation.setOptions({
       headerTitle: () => (
-        <Text>Notes</Text>
+        <Text style={styles.headerTitle}>Notes</Text>
       ),
       headerStyle: {
         backgroundColor: '#0080FF',
         borderBottomWidth: 0,
-        height: headerHeight,
+        height: 50,
       },
       headerTitleContainerStyle: {
         left: 0,
@@ -87,18 +86,19 @@ export default function NotesScreen({ navigation }) {
   const fetchNotes = async () => {
     setLoading(true);
     const userId = auth.currentUser.uid;
-
-    // try catch block
+  
     try {
-      // get notes data from 'notes' database
       const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
       const querySnapshot = await getDocs(notesQuery);
       const notesArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setNotes(notesArr);
-      // catch error
     } catch (error) {
-      // log error fetching notes if there is an error
       console.error("Error fetching notes: ", error);
+      if (error.code === 'unavailable') {
+        Alert.alert("Connection Error", "Failed to fetch notes because the client is offline.");
+      } else {
+        Alert.alert("Error", "An error occurred while fetching notes.");
+      }
     } finally {
       setLoading(false);
     }
@@ -173,20 +173,19 @@ export default function NotesScreen({ navigation }) {
   // return block
   return (
     <SafeAreaView style={styles.container}>
-      {/* If loading, display loading - need to change to Activity Indicator */}
-      {loading ? <Text>Loading...</Text> : (
+      {/* If loading, display loading */}
+      {loading ? (
+        <ActivityIndicator style={styles.loadingContainer} size="large" colors="#FFFFFF"/>
+      ) : (
         // displat FlatList for all the notes in their own container
         <FlatList
           data={notes}
           renderItem={renderNote}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
         />
       )}
       {/* Button to add a new note */}
-      <TouchableOpacity 
-        style={styles.fab} 
-        onPress={navigateToAddNote}
-      >
+      <TouchableOpacity style={styles.fab} onPress={navigateToAddNote}>
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -205,8 +204,8 @@ const styles = StyleSheet.create({
   // Header title style
   headerTitle: {
     textAlign: 'center',
-    fontFamily: 'FiraSans-ExtraBoldItalic.ttf',
-    fontSize: 24,
+    fontFamily: 'FiraSans-ExtraBoldItalic',
+    fontSize: 50,
     color: '#fff',
   },
   // Profile image style
@@ -224,6 +223,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  // Loading container style
+  centeredContainer: {
+    color: "#FFFFFF"
   },
   // Note item style
   noteItem: {

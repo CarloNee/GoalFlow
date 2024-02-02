@@ -46,7 +46,7 @@ export default function TasksScreen({ navigation }) {
         profileData?.photoURL ? (
           <Image
             source={{ uri: profileData.photoURL }}
-            style={{ width: 40, height: 40, borderRadius: 20 }}
+            style={{ width: 50, height: 50, borderRadius: 25 }}
           />
         ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
       ),
