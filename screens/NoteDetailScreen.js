@@ -87,26 +87,24 @@ export default function NoteDetailScreen({ route, navigation }) {
   // return block for UI 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Input for note, multiline, editable */}
+      {/* Note Content Input */}
       <TextInput
         style={styles.input}
         multiline
         editable={isEditing}
-        numberOfLines={4}
-        value={content}
         onChangeText={setContent}
-        placeholderTextColor="#c7c7c7"
+        value={content}
+        placeholder="Write your note..."
+        placeholderTextColor="#C7C7C7"
       />
 
-      {/* Toolbar */}
-      <View style={styles.toolbar}>
-        <TouchableOpacity style={styles.toolbarButton} onPress={handleSaveChanges}>
-          <MaterialIcons name="save" size={24} color="#fff" />
-          <Text style={styles.toolbarButtonText}>Save</Text>
+      {/* Action Bar */}
+      <View style={styles.actionBar}>
+        <TouchableOpacity style={styles.actionButton} onPress={handleSaveChanges}>
+          <Text style={styles.actionButtonText}>Save</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteNote}>
-          <MaterialIcons name="delete" size={24} color="#fff" />
-          <Text style={styles.toolbarButtonText}>Delete</Text>
+        <TouchableOpacity style={styles.actionButton} onPress={handleDeleteNote}>
+          <Text style={styles.actionButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -115,62 +113,40 @@ export default function NoteDetailScreen({ route, navigation }) {
 
 // StyleSheet
 const styles = StyleSheet.create({
-  // Container style
   container: {
     flex: 1,
-    backgroundColor: '#f7f7f7',
-    padding: 15,
+    backgroundColor: '#FFF',
+    paddingHorizontal: 20,
   },
-  //  Input style
   input: {
     flex: 1,
-    backgroundColor: '#fff',
+    marginTop: 30,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFF',
     fontSize: 18,
-    lineHeight: 24,
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e1e1e1',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    lineHeight: 28,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E1E1',
     color: '#333',
   },
-  // Toolbar for actions
-  toolbar: {
+  actionBar: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-end',
+    paddingVertical: 15,
+  },
+  actionButton: {
+    paddingHorizontal: 20,
     paddingVertical: 10,
+    marginHorizontal: 10,
+    borderRadius: 8,
   },
-  // Toolbar button style
-  toolbarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
-    padding: 10,
-    paddingHorizontal: 20,
-  },
-  // Toolbar button text style
-  toolbarButtonText: {
-    marginLeft: 5,
-    color: '#fff',
+  actionButtonText: {
     fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
   },
-  // Header buttons style
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  // Delete button style
   deleteButton: {
-    backgroundColor: '#FF3B30',
-    borderRadius: 20,
-    padding: 10,
-    paddingHorizontal: 20,
-    marginLeft: 15,
+    color: '#FF3B30',
   },
 });

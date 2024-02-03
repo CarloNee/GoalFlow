@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Font from 'expo-font';
+import { ScrollView } from 'react-native-gesture-handler';
 
 // Export NotesScreen
 export default function NotesScreen({ navigation }) {
@@ -16,7 +17,6 @@ export default function NotesScreen({ navigation }) {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const screenWidth = Dimensions.get('window').width;
-
 
   // if user is auth'ed, display notes
   useFocusEffect(
@@ -132,6 +132,7 @@ export default function NotesScreen({ navigation }) {
     
     // return block
     return (
+      <ScrollView style={styles.scrollContainer}>
       <View style={styles.noteItem}>
         <TouchableOpacity onPress={() => navigation.navigate('NoteDetail', { noteId: item.id })} style={styles.noteContentContainer}>
           <Text style={styles.noteTitle}>{trimmedTitle}</Text>
@@ -141,6 +142,7 @@ export default function NotesScreen({ navigation }) {
           <MaterialIcons name="delete" size={24} color="red" />
         </TouchableOpacity>
       </View>
+      </ScrollView>
     );
   };
 
@@ -151,10 +153,12 @@ export default function NotesScreen({ navigation }) {
 
   // return block
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* If loading, display loading */}
       {loading ? (
-        <ActivityIndicator style={styles.loadingContainer} size="large" colors="#FFFFFF"/>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFFFFF"/>
+        </View>
       ) : (
         // displat FlatList for all the notes in their own container
         <FlatList
@@ -167,7 +171,7 @@ export default function NotesScreen({ navigation }) {
       <TouchableOpacity style={styles.fab} onPress={navigateToAddNote}>
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -176,7 +180,8 @@ const styles = StyleSheet.create({
   // Container Style
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingTop: 0,
+    paddingHorizontal: 15,
     backgroundColor: '#0080FF', 
   },
   // Header title style
@@ -206,6 +211,16 @@ const styles = StyleSheet.create({
   centeredContainer: {
     color: "#FFFFFF"
   },
+  // Loading container style
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Scroll container style
+  scrollContainer: {
+    padding: 10,
+  },
   // Note item style
   noteItem: {
     flexDirection: 'row',
@@ -215,11 +230,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
   },
   // Note content container style
   noteContentContainer: {

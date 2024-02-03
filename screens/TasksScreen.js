@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   },
   // Action button icon style
   fabIcon: {
-    fontSize: 24,
+    fontSize: 30,
     color: "#0080FF",
   },
 });

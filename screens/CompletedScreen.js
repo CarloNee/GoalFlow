@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   // Container StyleSheet
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    padding: 10,
     backgroundColor: '#0080FF',
   },
   // Header title style
