@@ -1,6 +1,6 @@
 // Import section
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Button, TextInput, Image, Alert, TouchableOpacity, Touchable, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Text, Button, TextInput, Image, Alert, TouchableOpacity, Touchable, ActivityIndicator, SafeAreaView, StatusBar } from 'react-native';
 import { app, db, storage, auth, database } from '../firebase';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
@@ -144,6 +144,7 @@ export default function ProfileScreen({ navigation }) {
   // return block
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       {/* Header container */}
       <View style={styles.headerContainer}>
         <View style={styles.userInfo}>

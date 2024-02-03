@@ -45,7 +45,7 @@ export default function NotesScreen({ navigation }) {
         profileData?.photoURL ? (
           <Image
             source={{ uri: profileData.photoURL }}
-            style={{ width: 50, height: 50, borderRadius: 25 }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
           />
         ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
       ),
@@ -57,8 +57,6 @@ export default function NotesScreen({ navigation }) {
 
   // header options
   React.useLayoutEffect(() => {
-    const logoWidth = screenWidth * 0.5;
-    const logoHeight = (logoWidth * 424) / 1500; 
 
     navigation.setOptions({
       headerTitle: () => (
@@ -110,23 +108,16 @@ export default function NotesScreen({ navigation }) {
     }
   };
 
-  // function for sliding a note container from right to left, showing delete button
-  const renderRightActions = (progress, dragX, noteId) => {
-    const scale = dragX.interpolate({
-      inputRange: [-80, 0],
-      outputRange: [1, 0],
-      extrapolate: 'clamp',
-    });
-
-    // return the touchable opacity for deleting the note button
-    return (
-      <TouchableOpacity 
-        onPress={() => deleteNote(noteId)}
-        style={styles.deleteBox}>
-        <Animated.Text style={[styles.deleteText, { transform: [{ scale }] }]}>
-          Delete
-        </Animated.Text>
-      </TouchableOpacity>
+  // Function for confirming and deleting note
+  // Function for confirming and deleting note
+  const confirmAndDeleteNote = (noteId) => {
+    Alert.alert(
+      "Delete Note",
+      "Are you sure you want to delete this note?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", onPress: () => deleteNote(noteId) },
+      ]
     );
   };
 
@@ -141,21 +132,15 @@ export default function NotesScreen({ navigation }) {
     
     // return block
     return (
-      // swipe to reveal the delete
-      <Swipeable
-        renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}
-        overshootRight={false}
-      >
-        {/* Note container - touchable opacity to navigate to the singular note */}
-        <TouchableOpacity 
-          style={styles.noteItem} 
-          onPress={() => navigation.navigate('NoteDetail', { noteId: item.id })}
-        >
-          {/* Display trimmed title and content */}
+      <View style={styles.noteItem}>
+        <TouchableOpacity onPress={() => navigation.navigate('NoteDetail', { noteId: item.id })} style={styles.noteContentContainer}>
           <Text style={styles.noteTitle}>{trimmedTitle}</Text>
           <Text style={styles.noteContent}>{trimmedContent}</Text>
         </TouchableOpacity>
-      </Swipeable>
+        <TouchableOpacity onPress={() => confirmAndDeleteNote(item.id)} style={styles.deleteIcon}>
+          <MaterialIcons name="delete" size={24} color="red" />
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -191,7 +176,6 @@ const styles = StyleSheet.create({
   // Container Style
   container: {
     flex: 1,
-    paddingTop: 20,
     paddingHorizontal: 10,
     backgroundColor: '#0080FF', 
   },
@@ -199,7 +183,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontFamily: 'FiraSans-ExtraBoldItalic',
-    fontSize: 50,
+    fontSize: 25,
     color: '#fff',
   },
   // Profile image style
@@ -224,6 +208,9 @@ const styles = StyleSheet.create({
   },
   // Note item style
   noteItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: '#f0f0f0',
     borderRadius: 10,
     padding: 15,
@@ -233,6 +220,14 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+  },
+  // Note content container style
+  noteContentContainer: {
+    flex: 1,
+  },
+  // Delete icon style
+  deleteIcon: {
+    marginLeft: 10,
   },
   // Note title style
   noteTitle: {

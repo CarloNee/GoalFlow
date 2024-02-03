@@ -1,9 +1,11 @@
 // Import Section
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, ActivityIndicator, Dimensions, Image } from 'react-native';
 import { db, auth } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
+import { MaterialIcons } from "@expo/vector-icons";
+import * as Font from 'expo-font';
 
 // Export Completed Screen
 export default function CompletedScreen({ navigation }) {
@@ -11,6 +13,8 @@ export default function CompletedScreen({ navigation }) {
   // completed tasks and loading
   const [completedTasks, setCompletedTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const screenWidth = Dimensions.get('window').width;
+  const [profileData, setProfileData] = useState(null);
 
   // useFocusEffect - check if current user is auth'ed, if so - fetch completed tasks 
   // see fetchCompletedTasks function
@@ -22,6 +26,61 @@ export default function CompletedScreen({ navigation }) {
       return () => {}; 
     }, [])
   );
+
+  // useFocusEffect to refresh tasks and user profile every time the screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUserProfile();
+    }, [])
+  );
+
+  // Function to fetch user profile data
+  const fetchUserProfile = async () => {
+    const docRef = doc(db, "users", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setProfileData(docSnap.data());
+    }
+  };
+
+  // useLayoutEffect for header
+  React.useLayoutEffect(() => {
+    fetchUserProfile();
+    navigation.setOptions({
+      headerRight: () => (
+        profileData?.photoURL ? (
+          <Image
+            source={{ uri: profileData.photoURL }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+        ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
+      ),
+      headerRightContainerStyle: {
+        paddingRight: 10,
+      },
+    });
+  }, [navigation, profileData]);
+
+  // header options
+  React.useLayoutEffect(() => {
+    const logoWidth = screenWidth * 0.5;
+    const logoHeight = (logoWidth * 424) / 1500; 
+
+    navigation.setOptions({
+      headerTitle: () => (
+        <Text style={styles.headerTitle}>Completed Tasks</Text>
+      ),
+      headerStyle: {
+        backgroundColor: '#0080FF',
+        borderBottomWidth: 0,
+      },
+      headerTitleContainerStyle: {
+        left: 0,
+        right: 0,
+      },
+      headerShadowVisible: false,
+    });
+  }, [navigation]);  
 
   // function for fetch completed tasks from user in database
   const fetchCompletedTasks = async () => {
@@ -81,7 +140,10 @@ export default function CompletedScreen({ navigation }) {
     <View style={styles.container}>
       {/* If loding, show the loading tasks text - change to loading indicator */}
       {loading ? (
-        <Text>Loading Completed Tasks...</Text>
+        // loading indicator
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFFFFF" />
+      </View>
       ) : (
         // else show the tasks in the way the function renderCompletedTask has conveyed it
         <FlatList
@@ -101,6 +163,39 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     backgroundColor: '#0080FF',
+  },
+  // Header title style
+  headerTitle: {
+    textAlign: 'center',
+    fontFamily: 'FiraSans-ExtraBoldItalic',
+    fontSize: 25,
+    color: '#fff',
+  },
+  // Profile image style
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  // Header right container style
+  headerRightContainer: {
+    paddingRight: 10,
+  },
+  // Header title container style
+  headerTitleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Loading container style
+  centeredContainer: {
+    color: "#FFFFFF"
+  },
+  // Loading container style
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   // Task item style
   taskItem: {

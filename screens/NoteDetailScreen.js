@@ -97,33 +97,80 @@ export default function NoteDetailScreen({ route, navigation }) {
         onChangeText={setContent}
         placeholderTextColor="#c7c7c7"
       />
+
+      {/* Toolbar */}
+      <View style={styles.toolbar}>
+        <TouchableOpacity style={styles.toolbarButton} onPress={handleSaveChanges}>
+          <MaterialIcons name="save" size={24} color="#fff" />
+          <Text style={styles.toolbarButtonText}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteNote}>
+          <MaterialIcons name="delete" size={24} color="#fff" />
+          <Text style={styles.toolbarButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 
 // StyleSheet
 const styles = StyleSheet.create({
-  // Container styling
+  // Container style
   container: {
     flex: 1,
-    backgroundColor: '#fffde7',
+    backgroundColor: '#f7f7f7',
+    padding: 15,
   },
-  // Input styling
+  //  Input style
   input: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
-    padding: 10,
-    borderWidth: 0,
+    backgroundColor: '#fff',
+    fontSize: 18,
+    lineHeight: 24,
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    color: '#333',
   },
-  // Header buttons styling
+  // Toolbar for actions
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+  },
+  // Toolbar button style
+  toolbarButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 20,
+    padding: 10,
+    paddingHorizontal: 20,
+  },
+  // Toolbar button text style
+  toolbarButtonText: {
+    marginLeft: 5,
+    color: '#fff',
+    fontSize: 16,
+  },
+  // Header buttons style
   headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 10,
   },
-  // Delete button styling
+  // Delete button style
   deleteButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 20,
+    padding: 10,
+    paddingHorizontal: 20,
     marginLeft: 15,
   },
 });

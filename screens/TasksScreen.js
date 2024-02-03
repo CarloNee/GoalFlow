@@ -9,9 +9,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 // Export TasksScreen
 export default function TasksScreen({ navigation }) {
-  // const [fontsLoaded] = useFonts({
-  //   FiraSans_800ExtraBold_Italic,
-  // });
 
   // declaration of functional components
   // tasks, loading, profile data
@@ -46,7 +43,7 @@ export default function TasksScreen({ navigation }) {
         profileData?.photoURL ? (
           <Image
             source={{ uri: profileData.photoURL }}
-            style={{ width: 50, height: 50, borderRadius: 25 }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
           />
         ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
       ),
