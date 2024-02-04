@@ -6,6 +6,7 @@ import { Picker } from "@react-native-picker/picker";
 import { db, auth } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Export AddTaskScreen
 export default function AddTaskScreen({ navigation }) {
@@ -40,24 +41,41 @@ export default function AddTaskScreen({ navigation }) {
       Alert.alert("Error", "Please enter a title for the task.");
       return;
     }
-
     // try catch block
     try {
-      // add data to the database function - import and use addDoc
+      const newTask = {
+        // add data to the database function - import and use addDoc
       // title, due date, priority, description, subtasks, userId to reference data to unique uid
-      await addDoc(collection(db, "tasks"), {
         title,
         dueDate: Timestamp.fromDate(dueDate), 
         priority,
         description,
         subtasks,
         userId: auth.currentUser.uid,
-      });
+      };
+  
+      const docRef = await addDoc(collection(db, "tasks"), newTask);
+      newTask.id = docRef.id; // Set the newly created task ID
+  
+      // Alert and navigation
+      Alert.alert("Success", "Task added successfully.", [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate("Tasks", { newTaskAdded: true })
+        }
+      ]);
+  
+      // Update AsyncStorage
+      const userId = auth.currentUser.uid;
 
-      // Alert message for successful task, then return back to previous screen
-      Alert.alert("Success", "Task added successfully.");
-      navigation.goBack();
-      // catch error then alert the error message
+      const storedTasks = await AsyncStorage.getItem(`tasks_${userId}`);
+
+      let tasksArray = storedTasks ? JSON.parse(storedTasks) : [];
+
+      tasksArray.push(newTask);
+
+      await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArray));
+
     } catch (error) {
       Alert.alert("Error", error.message);
     }
