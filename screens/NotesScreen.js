@@ -188,7 +188,12 @@ const fetchNotes = async () => {
       {/* If loading, display loading */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF"/>
+          <ActivityIndicator size="large" color="#FFFFFF" />
+        </View>
+      ) : notes.length === 0 ? (
+        // Display "No Notes" when there are no notes
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No notes...</Text>
         </View>
       ) : (
         // displat FlatList for all the notes in their own container
@@ -269,6 +274,17 @@ const styles = StyleSheet.create({
   // Delete icon style
   deleteIcon: {
     marginLeft: 10,
+  },
+  // Empty container style
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Empty container text style
+  emptyText: {
+    fontSize: 20,
+    color: 'white',
   },
   // Note title style
   noteTitle: {

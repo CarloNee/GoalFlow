@@ -16,6 +16,7 @@ export default function CompletedScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const screenWidth = Dimensions.get('window').width;
   const [profileData, setProfileData] = useState(null);
+  
 
   // useFocusEffect - check if current user is auth'ed, if so - fetch completed tasks 
   // see fetchCompletedTasks function
@@ -83,7 +84,6 @@ export default function CompletedScreen({ navigation }) {
     });
   }, [navigation]);  
 
-  // function for fetch completed tasks from user in database
 // Function for fetch completed tasks from user in database
 const fetchCompletedTasks = async () => {
   setLoading(true);
@@ -140,14 +140,14 @@ const fetchCompletedTasks = async () => {
   // return block for the UI
   return (
     <View style={styles.container}>
-      {/* If loding, show the loading tasks text - change to loading indicator */}
+      {/* If loding, show the loading tasks text */}
       {loading ? (
         // loading indicator
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
       ) : (
-        // else show the tasks in the way the function renderCompletedTask has conveyed it
+        // else show the tasks
         <FlatList
           data={completedTasks}
           renderItem={renderCompletedTask}
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
   },
-  // description text in the description container style
+  // description text style
   descriptionText: {
     fontSize: 16,
     color: "#333",

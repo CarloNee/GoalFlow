@@ -9,7 +9,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Export TasksScreen
-export default function TasksScreen({ navigation }) {
+export default function TasksScreen({ navigation, route }) {
 
   // declaration of functional components
   // tasks, loading, profile data
@@ -57,10 +57,40 @@ export default function TasksScreen({ navigation }) {
   // useFocusEffect to refresh tasks and user profile every time the screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      fetchTasks();
-      fetchUserProfile();
-    }, [])
+      const unsubscribe = navigation.addListener('focus', () => {
+        // Fetch user profile data every time the screen is focused
+        fetchUserProfile();
+
+        // Check if a new task has been added and fetch tasks
+        const routeParams = navigation.getState().routes.find(route => route.name === 'TasksScreen')?.params;
+        if (routeParams?.newTaskAdded) {
+          fetchTasks();
+          // Reset the parameter so it doesn't refetch every time
+          navigation.setParams({ newTaskAdded: false });
+        } else {
+          // Fetch tasks if not triggered by new task addition
+          fetchTasks();
+        }
+      });
+      return unsubscribe;
+    }, [navigation])
   );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Fetch user profile data every time the screen is focused
+      fetchUserProfile();
+
+      // Check if a new task has been added
+      if (route.params?.newTaskAdded) {
+        fetchTasks();
+        // Clear the parameter after fetching
+        navigation.setParams({ newTaskAdded: false });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, route.params?.newTaskAdded]);
 
   // header options
   React.useLayoutEffect(() => {
