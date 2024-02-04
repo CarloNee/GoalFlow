@@ -6,6 +6,7 @@ import { collection, query as firestoreQuery, where, getDocs, doc, deleteDoc, ad
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from "@expo/vector-icons";
 // import { useFonts, FiraSans_800ExtraBold_Italic } from '@expo-google-fonts/fira-sans';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Export TasksScreen
 export default function TasksScreen({ navigation }) {
@@ -93,21 +94,29 @@ export default function TasksScreen({ navigation }) {
     if (auth.currentUser) {
       setLoading(true);
       const userId = auth.currentUser.uid;
-
-      // try catch block
+  
       try {
-        const tasksQuery = firestoreQuery(
-          collection(db, "tasks"),
-          where("userId", "==", userId)
-        );
-
-        const querySnapshot = await getDocs(tasksQuery);
-        const tasksArr = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setTasks(tasksArr);
-        // if error, catch and display error in console
+        // Check AsyncStorage first
+        const storedTasks = await AsyncStorage.getItem(`tasks_${userId}`);
+        if (storedTasks !== null) {
+          setTasks(JSON.parse(storedTasks));
+        } else {
+          // Fetch from Firebase if not in AsyncStorage
+          const tasksQuery = firestoreQuery(
+            collection(db, "tasks"),
+            where("userId", "==", userId)
+          );
+  
+          const querySnapshot = await getDocs(tasksQuery);
+          const tasksArr = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+  
+          setTasks(tasksArr);
+          // Store fetched tasks in AsyncStorage
+          await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArr));
+        }
       } catch (error) {
         console.error("Error fetching tasks: ", error);
       } finally {
@@ -125,16 +134,17 @@ export default function TasksScreen({ navigation }) {
 
   // function to place completed task in completed database
   const completeTask = async (taskId, taskData) => {
+    const userId = auth.currentUser.uid;
+  
     try {
-      // Add task to 'completed' datasbase
+      // Update Firebase
       await addDoc(collection(db, "completed"), taskData);
-
-      // Delete task from 'tasks' database
       await deleteDoc(doc(db, "tasks", taskId));
-
-      // Update UI
-      fetchTasks();
-      // if error, catch error and display error message & console used for development purpose
+  
+      // Update local state and AsyncStorage
+      const updatedTasks = tasks.filter(task => task.id !== taskId);
+      setTasks(updatedTasks);
+      await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
     } catch (error) {
       console.error("Error completing task: ", error);
       Alert.alert("Error", "Unable to complete task.");
@@ -143,10 +153,16 @@ export default function TasksScreen({ navigation }) {
 
   // function to delete task
   const deleteTask = async (taskId) => {
+    const userId = auth.currentUser.uid;
+  
     try {
+      // Update Firebase
       await deleteDoc(doc(db, "tasks", taskId));
-      fetchTasks();
-      // if error, display error but also console.log error for dev purposes
+  
+      // Update local state and AsyncStorage
+      const updatedTasks = tasks.filter(task => task.id !== taskId);
+      setTasks(updatedTasks);
+      await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
     } catch (error) {
       console.error("Error deleting task: ", error);
       Alert.alert("Error", "Unable to delete task.");

@@ -10,6 +10,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Font from 'expo-font';
 import { ScrollView } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Export NotesScreen
 export default function NotesScreen({ navigation }) {
@@ -74,27 +75,37 @@ export default function NotesScreen({ navigation }) {
     });
   }, [navigation]);  
 
-  // function for fetching notes
-  const fetchNotes = async () => {
-    setLoading(true);
-    const userId = auth.currentUser.uid;
-  
+// function for fetching notes, either from AsyncStorage or Firebase
+const fetchNotes = async () => {
+  setLoading(true);
+  const userId = auth.currentUser.uid;
+
+  // try to retrieve the cached notes from AsyncStorage
+  const cachedNotes = await AsyncStorage.getItem(`notes_${userId}`);
+
+  // Check if there are cached notes available
+  if (cachedNotes) {
+    // Parse the stringified notes data and update state
+    setNotes(JSON.parse(cachedNotes));
+    setLoading(false);
+  } else {
+    // If no cached data, fetch notes from Firebase
     try {
       const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
       const querySnapshot = await getDocs(notesQuery);
       const notesArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setNotes(notesArr);
+      // Cache the fetched notes by storing them in AsyncStorage
+      await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArr));
     } catch (error) {
+      // Handle and display errors related to fetching notes
       console.error("Error fetching notes: ", error);
-      if (error.code === 'unavailable') {
-        Alert.alert("Connection Error", "Failed to fetch notes because the client is offline.");
-      } else {
-        Alert.alert("Error", "An error occurred while fetching notes.");
-      }
+      Alert.alert("Error", "An error occurred while fetching notes.");
     } finally {
       setLoading(false);
     }
-  };
+  }
+};
 
   // function for deleting note
   const deleteNote = async (noteId) => {
@@ -102,13 +113,15 @@ export default function NotesScreen({ navigation }) {
       // use deleteDoc function from firebase
       await deleteDoc(doc(db, 'notes', noteId));
       fetchNotes(); 
+      removeFromCache(noteId);
+      // Update local state if needed
+      setNotes(notes.filter(note => note.id !== noteId));
       // if error, display error
     } catch (error) {
       console.error("Error deleting note: ", error);
     }
   };
 
-  // Function for confirming and deleting note
   // Function for confirming and deleting note
   const confirmAndDeleteNote = (noteId) => {
     Alert.alert(
@@ -120,6 +133,24 @@ export default function NotesScreen({ navigation }) {
       ]
     );
   };
+
+  // Function to update the cache after adding/editing a note
+  const updateCache = async (updatedNotes) => {
+    const userId = auth.currentUser.uid;
+    await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(updatedNotes));
+  };
+
+ // Function to remove a note from the cache
+  const removeFromCache = async (noteId) => {
+    const userId = auth.currentUser.uid;
+    const cachedNotes = await AsyncStorage.getItem(`notes_${userId}`);
+    if (cachedNotes) {
+      let notesArr = JSON.parse(cachedNotes);
+      notesArr = notesArr.filter(note => note.id !== noteId);
+      await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArr));
+    }
+  }; 
+
 
   // function to render the note
   const renderNote = ({ item }) => {

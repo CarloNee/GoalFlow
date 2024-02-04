@@ -6,6 +6,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Font from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Export Completed Screen
 export default function CompletedScreen({ navigation }) {
@@ -83,39 +84,41 @@ export default function CompletedScreen({ navigation }) {
   }, [navigation]);  
 
   // function for fetch completed tasks from user in database
-  const fetchCompletedTasks = async () => {
-    // set the loading state as true
-    setLoading(true);
-    // userId = the uid of the current auth'ed user
-    const userId = auth.currentUser.uid;
+// Function for fetch completed tasks from user in database
+const fetchCompletedTasks = async () => {
+  setLoading(true);
+  const userId = auth.currentUser.uid;
 
-    // try catch block
-    try {
-      // declare completedTasksQuery, querySnapshot and tasksArr
+  try {
+    // First, try to get completed tasks from AsyncStorage
+    const storedCompletedTasks = await AsyncStorage.getItem(`completedTasks_${userId}`);
+    if (storedCompletedTasks !== null) {
+      // If tasks are found in AsyncStorage, use them
+      setCompletedTasks(JSON.parse(storedCompletedTasks));
+    } else {
+      // If no tasks in AsyncStorage, fetch from Firebase
       const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
       const querySnapshot = await getDocs(completedTasksQuery);
       const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setCompletedTasks(tasksArr);
-    } catch (error) {
-      // console the error if unable to fetch the completed tasks from database
-      console.error("Error fetching completed tasks: ", error);
-      // show the user the error as an alert so they are infromed completed tasks cannot be fetched
-      Alert.alert('Error', 'Unable to fetch completed tasks.');
-    } finally {
-      // change setLoading state to false
-      setLoading(false);
+
+      // Store the fetched tasks in AsyncStorage
+      await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
     }
-  };
+  } catch (error) {
+    console.error("Error fetching completed tasks: ", error);
+    Alert.alert('Error', 'Unable to fetch completed tasks.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // function to render the completed task
   const renderCompletedTask = ({ item }) => (
     // task container
     <View style={styles.taskItem}>
-      {/* on pressing the task, navigate to the Edit Task Screen */}
-      <TouchableOpacity onPress={() => navigation.navigate("EditTask", { taskId: item.id })}>
         {/* Title of the completed Task */}
         <Text style={styles.taskTitle}>{item.title}</Text>
-  
         {/* Task detail section */}
         <View style={styles.taskDetails}>
           {/* Text for the date */}
@@ -131,7 +134,6 @@ export default function CompletedScreen({ navigation }) {
             {item.description}
           </Text>
         </View>
-      </TouchableOpacity>
     </View>
   );
 

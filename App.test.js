@@ -29,7 +29,6 @@ jest.mock('@react-navigation/native', () => {
 
 // Mock Firebase
 jest.mock('./firebase', () => {
-  // Define mock implementation
   return {
     
   };

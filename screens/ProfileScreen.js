@@ -9,6 +9,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import uuid from "uuid";
 import { FontAwesome } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Export ProfileScreen
 export default function ProfileScreen({ navigation }) {
@@ -22,10 +23,16 @@ export default function ProfileScreen({ navigation }) {
   // fetch data, need to fetch the users details from the 'users' database
   useEffect(() => {
     const fetchData = async () => {
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setProfileData(docSnap.data());
+      const cachedProfileData = await AsyncStorage.getItem('profileData');
+      if (cachedProfileData !== null) {
+        setProfileData(JSON.parse(cachedProfileData));
+      } else {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setProfileData(docSnap.data());
+          await AsyncStorage.setItem('profileData', JSON.stringify(docSnap.data()));
+        }
       }
     };
     fetchData();
@@ -284,10 +291,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   // Profile image style
   profileImage: {
@@ -324,10 +327,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     fontSize: 16,
     fontFamily: 'System',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
   },
   // Button container style
   buttonContainer: {
@@ -343,7 +342,7 @@ const styles = StyleSheet.create({
   // delete button container
   deleteButtonContainer: {
     position: 'absolute',
-    bottom: 50, // Adjust the distance from the bottom
+    bottom: 50,
     width: '100%',
     paddingHorizontal: 20,
   },
@@ -354,10 +353,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 50,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
   },
   saveButton: {
     backgroundColor: '#0080FF',
@@ -365,10 +360,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 50,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
   },
   // Delete button style
   deleteButton: {
@@ -380,10 +371,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     flexDirection: 'row',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
   },
   // Delete button text style
   deleteButtonText: {
