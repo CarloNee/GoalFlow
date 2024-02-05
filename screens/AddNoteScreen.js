@@ -28,16 +28,12 @@ export default function AddNoteScreen({ navigation }) {
   useEffect(() => {
     fetchUserProfile();
     navigation.setOptions({
-      headerRight: () =>
-        profileData?.photoURL ? (
-          <Image
-            source={{ uri: profileData.photoURL }}
-            style={styles.profileImage}
-          />
-        ) : (
-          <MaterialIcons name="account-circle" size={40} color="#fff" />
-        ),
       headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+          <MaterialIcons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
         <TouchableOpacity onPress={handleSaveNote} style={styles.headerButton}>
           <Text style={styles.headerButtonText}>Save</Text>
         </TouchableOpacity>
@@ -160,8 +156,9 @@ const styles = StyleSheet.create({
   },
   // Header button text style
   headerButtonText: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#FFFFFF",
+    padding: 10,
   },
   // Title input style
   titleInput: {
