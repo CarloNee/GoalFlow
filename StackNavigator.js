@@ -36,7 +36,7 @@ export default function StackNavigator() {
       {/* Edit Task Screen */}
       <Stack.Screen name="EditTask" component={EditTaskScreen} options={{ headerShown: true }} />
       {/* Add Note Screen */}
-      <Stack.Screen name="AddNote" component={AddNoteScreen} options={{ headerShown: true }} />
+      <Stack.Screen name="AddNote" component={AddNoteScreen} options={{ headerShown: true, gestureEnabled: true }} />
       {/* Note Detail Screen */}
       <Stack.Screen name="NoteDetail" component={NoteDetailScreen} options={{ headerShown: true }} />
     </Stack.Navigator>

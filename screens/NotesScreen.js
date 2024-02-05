@@ -125,15 +125,20 @@ export default function NotesScreen({ navigation }) {
   // function for deleting note
   const deleteNote = async (noteId) => {
     try {
-      // use deleteDoc function from firebase
+      // Delete the note from Firebase
       await deleteDoc(doc(db, 'notes', noteId));
-      fetchNotes(); 
-      removeFromCache(noteId);
-      // Update local state if needed
-      setNotes(notes.filter(note => note.id !== noteId));
-      // if error, display error
+
+      // Filter out the deleted note from the current notes array
+      const updatedNotes = notes.filter(note => note.id !== noteId);
+
+      // Update AsyncStorage with the new notes array
+      await updateCache(updatedNotes);
+
+      // Update local state with the new notes array
+      setNotes(updatedNotes);
     } catch (error) {
       console.error("Error deleting note: ", error);
+      Alert.alert("Error", "An error occurred while deleting the note.");
     }
   };
 
@@ -312,11 +317,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  // Add button style
+  // Action button style
   fab: {
     position: "absolute",
-    width: 56,
-    height: 56,
+    width: 50,
+    height: 50,
     alignItems: "center",
     justifyContent: "center",
     right: 20,
@@ -325,10 +330,11 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     elevation: 8,
   },
-  // Add Icon style
+  // Action button icon style
   fabIcon: {
-    fontSize: 24,
+    fontSize: 50,
     color: "#0080FF",
+    lineHeight: 56,
   },
   // Delete box style
   deleteBox: {

@@ -83,7 +83,10 @@ export default function AddTaskScreen({ navigation }) {
         // add data to the database function - import and use addDoc
       // title, due date, priority, description, subtasks, userId to reference data to unique uid
         title,
-        dueDate: Timestamp.fromDate(dueDate), 
+        dueDate: { 
+          seconds: Math.floor(dueDate.getTime() / 1000), 
+          nanoseconds: (dueDate.getTime() % 1000) * 1000000 
+        }, 
         priority,
         description,
         subtasks,

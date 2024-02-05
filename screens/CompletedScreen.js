@@ -84,34 +84,47 @@ export default function CompletedScreen({ navigation }) {
     });
   }, [navigation]);  
 
-// Function for fetch completed tasks from user in database
-const fetchCompletedTasks = async () => {
-  setLoading(true);
-  const userId = auth.currentUser.uid;
-
-  try {
-    // First, try to get completed tasks from AsyncStorage
-    const storedCompletedTasks = await AsyncStorage.getItem(`completedTasks_${userId}`);
-    if (storedCompletedTasks !== null) {
-      // If tasks are found in AsyncStorage, use them
-      setCompletedTasks(JSON.parse(storedCompletedTasks));
-    } else {
-      // If no tasks in AsyncStorage, fetch from Firebase
+  const fetchCompletedTasks = async () => {
+    // Setting loading state to true at the beginning of the function
+    setLoading(true);
+    const userId = auth.currentUser.uid;
+    console.log("Fetching completed tasks for user ID:", userId);
+  
+    try {
+      console.log("Fetching tasks from Firebase...");
+      // Creating a query to fetch tasks from the 'completed' collection in Firebase Firestore
       const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
+      
+      // Executing the query and getting a snapshot of the data
       const querySnapshot = await getDocs(completedTasksQuery);
-      const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setCompletedTasks(tasksArr);
-
-      // Store the fetched tasks in AsyncStorage
-      await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
+      console.log("Query Snapshot:", querySnapshot);
+  
+      if (!querySnapshot.empty) {
+        // If the query returned data, map through each document in the snapshot
+        const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("Fetched Completed Tasks from Firebase:", tasksArr);
+        
+        // Setting the state with the fetched tasks array
+        setCompletedTasks(tasksArr);
+        
+        // Updating AsyncStorage with the latest fetched data for offline access
+        await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
+      } else {
+        // If no documents were returned by the query
+        console.log("No completed tasks found in Firebase for this user.");
+        
+        // Clearing the tasks in the state if none were found in Firebase
+        setCompletedTasks([]);
+      }
+    } catch (error) {
+      // Handling any errors that occur during the fetch process
+      console.error("Error fetching completed tasks: ", error);
+      Alert.alert('Error', 'Unable to fetch completed tasks.');
+    } finally {
+      // Setting loading state to false at the end of the function
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching completed tasks: ", error);
-    Alert.alert('Error', 'Unable to fetch completed tasks.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // function to render the completed task
   const renderCompletedTask = ({ item }) => (
@@ -123,7 +136,7 @@ const fetchCompletedTasks = async () => {
         <View style={styles.taskDetails}>
           {/* Text for the date */}
           <Text style={styles.dateTitle}>
-            Due: {item.dueDate.toDate ? item.dueDate.toDate().toLocaleDateString() : new Date(item.dueDate.seconds * 1000).toLocaleDateString()}
+            Due: {new Date(item.dueDate.seconds * 1000).toLocaleDateString()}
           </Text>
           {/* Text for the priority */}
           <Text style={styles.priorityTitle}>Priority: {item.priority}</Text>

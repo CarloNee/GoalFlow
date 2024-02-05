@@ -380,8 +380,8 @@ const styles = StyleSheet.create({
   // Action button style
   fab: {
     position: "absolute",
-    width: 56,
-    height: 56,
+    width: 50,
+    height: 50,
     alignItems: "center",
     justifyContent: "center",
     right: 20,
@@ -392,7 +392,8 @@ const styles = StyleSheet.create({
   },
   // Action button icon style
   fabIcon: {
-    fontSize: 30,
+    fontSize: 50,
     color: "#0080FF",
+    lineHeight: 56,
   },
 });

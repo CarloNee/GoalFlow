@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TextInput, Button, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 
 // Export EditTaskScreen
 export default function EditTaskScreen({ route, navigation }) {
@@ -51,31 +51,27 @@ export default function EditTaskScreen({ route, navigation }) {
     fetchTask();
   }, [taskId, navigation]);
 
-  // Function to handle task update
   const handleUpdateTask = async () => {
-    // If no title, display error to the user
     if (!title) {
       Alert.alert('Error', 'Please enter a title for the task.');
       return;
     }
-
-    // try catch block
+  
     try {
-      // update database 'tasks' - use updateDoc from firebase
+      // Convert JavaScript Date object to Firestore Timestamp
+      const firestoreTimestamp = Timestamp.fromDate(dueDate);
+  
       const taskRef = doc(db, 'tasks', taskId);
       await updateDoc(taskRef, {
         title,
-        dueDate,
+        dueDate: firestoreTimestamp, // Update with Firestore Timestamp
         priority,
         description,
         subtasks,
       });
-
-      // Display alert informing user task updated
+  
       Alert.alert('Success', 'Task updated successfully.');
-      // navigate back to previous screen
       navigation.goBack();
-      // if error, display error message
     } catch (error) {
       Alert.alert('Error', error.message);
     }

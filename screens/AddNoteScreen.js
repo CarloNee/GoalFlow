@@ -14,6 +14,7 @@ export default function AddNoteScreen({ navigation }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [profileData, setProfileData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
@@ -67,7 +68,7 @@ export default function AddNoteScreen({ navigation }) {
       notesArray.push(newNote);
       await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArray));
     };
-
+    setIsLoading(true);
     // try catch block
     try {
       const newNote = {
@@ -86,11 +87,13 @@ export default function AddNoteScreen({ navigation }) {
       Alert.alert("Success", "Note added successfully.", [
         {
           text: "OK",
-          onPress: () => navigation.goBack(),
+          onPress: () => navigation.navigate('Notes')
         },
       ]);
     } catch (error) {
       Alert.alert("Error", error.message);
+    } finally {
+      setIsLoading(false); // Stop loading regardless of the result
     }
   };
 
@@ -100,7 +103,7 @@ export default function AddNoteScreen({ navigation }) {
       {/* Note title area */}
       <TextInput
         style={styles.titleInput}
-        placeholder="Note Title"
+        placeholder="Title"
         placeholderTextColor="#c7c7c7"
         value={title}
         onChangeText={setTitle}

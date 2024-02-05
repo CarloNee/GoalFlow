@@ -103,10 +103,21 @@ export default function ProfileScreen({ navigation }) {
   };
 
   // Function for handling the logout
+  const handleLogout = async () => {
+    try {
+      // Clear AsyncStorage data
+      await AsyncStorage.clear();
+      console.log('AsyncStorage has been cleared.');
+
+      // Perform Firebase sign out
+      await auth.signOut();
+
+      // Navigate to the login screen
       navigation.replace('Login');
-    }).catch(error => {
-      Alert.alert('Error', error.message);
-    });
+    } catch (error) {
+      console.error('Error during logout: ', error);
+      Alert.alert('Error', 'Logout failed. Please try again.');
+    }
   };
 
   // function handling the deletion of an account
