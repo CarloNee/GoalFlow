@@ -1,57 +1,106 @@
 // Import Section
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, Alert, TouchableOpacity, Text } from 'react-native';
-import { db, auth } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, TextInput, Alert, TouchableOpacity, Text, Image } from "react-native";
+import { db, auth } from "../firebase";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
+import * as Font from "expo-font";
 
 // Export AddNoteScreen
 export default function AddNoteScreen({ navigation }) {
   // Declare Title, Content for Note (useState)
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [profileData, setProfileData] = useState(null);
 
-  // useEffect function for handling save button on top right of the header section
+  // Function to fetch user profile data
+  const fetchUserProfile = async () => {
+    const docRef = doc(db, "users", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setProfileData(docSnap.data());
+    }
+  };
+
+  // useEffect function for handling save button and header
   useEffect(() => {
+    fetchUserProfile();
     navigation.setOptions({
-      headerRight: () => (
+      headerRight: () =>
+        profileData?.photoURL ? (
+          <Image
+            source={{ uri: profileData.photoURL }}
+            style={styles.profileImage}
+          />
+        ) : (
+          <MaterialIcons name="account-circle" size={40} color="#fff" />
+        ),
+      headerLeft: () => (
         <TouchableOpacity onPress={handleSaveNote} style={styles.headerButton}>
           <Text style={styles.headerButtonText}>Save</Text>
         </TouchableOpacity>
       ),
+      headerTitle: () => <Text style={styles.headerTitle}>New Note</Text>,
+      headerStyle: {
+        backgroundColor: "#0080FF",
+      },
+      headerTitleStyle: {
+        color: "white",
+      },
+      headerTintColor: "white",
     });
-  }, [title, content, navigation]);
+  }, [title, content, navigation, profileData]);
 
   // handleSaveNote function
   const handleSaveNote = async () => {
     if (!title.trim() || !content.trim()) {
-      Alert.alert('Error', 'Please enter a title and some content for the note.');
+      Alert.alert(
+        "Error",
+        "Please enter a title and some content for the note."
+      );
       return;
     }
 
-    //  try catch block
+    // Function to update AsyncStorage with the new note
+    const updateAsyncStorage = async (newNote) => {
+      const userId = auth.currentUser.uid;
+      const storedNotes = await AsyncStorage.getItem(`notes_${userId}`);
+      let notesArray = storedNotes ? JSON.parse(storedNotes) : [];
+      notesArray.push(newNote);
+      await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArray));
+    };
+
+    // try catch block
     try {
-      // add the details of the note to the database - add title, content, timestamp, userId
-      await addDoc(collection(db, 'notes'), {
+      const newNote = {
         title,
         content,
         timestamp: new Date(),
         userId: auth.currentUser.uid,
-      });
+      };
 
-      // Alert if successful
-      Alert.alert('Success', 'Note added successfully.');
-      // Go back to the previous screen upon completion
-      navigation.goBack();
-      // Alert message for error as to why note was not added to database
+      const docRef = await addDoc(collection(db, "notes"), newNote);
+      // Set the newly created note ID
+      newNote.id = docRef.id;
+      // Update AsyncStorage
+      await updateAsyncStorage(newNote);
+
+      Alert.alert("Success", "Note added successfully.", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
   // return block for the UI
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Note title area */}
       <TextInput
         style={styles.titleInput}
@@ -70,7 +119,7 @@ export default function AddNoteScreen({ navigation }) {
         value={content}
         onChangeText={setContent}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -78,12 +127,46 @@ export default function AddNoteScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+  },
+  // Header title style
+  headerTitle: {
+    textAlign: "center",
+    fontFamily: "FiraSans-ExtraBoldItalic",
+    fontSize: 25,
+    color: "#fff",
+  },
+  // Profile image style
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  // Header right container style
+  headerRightContainer: {
+    paddingRight: 10,
+  },
+  // Header title container style
+  headerTitleContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  // Header button style
+  headerButton: {
+    marginLeft: 10,
+  },
+  // Header button text style
+  headerButtonText: {
+    fontSize: 16,
+    color: "#FFFFFF",
   },
   // Title input style
   titleInput: {
     fontSize: 25,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     padding: 10,
     borderBottomWidth: 0,
   },
@@ -94,14 +177,5 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     padding: 10,
     borderBottomWidth: 0,
-  },
-  // Header button style
-  headerButton: {
-    marginRight: 10,
-  },
-  // Header button text style
-  headerButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
   },
 });
