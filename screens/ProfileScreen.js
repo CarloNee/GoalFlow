@@ -102,10 +102,7 @@ export default function ProfileScreen({ navigation }) {
     Alert.alert('Profile Updated');
   };
 
-  // function for handling the logout
-  const handleLogout = () => {
-    auth.signOut().then(() => {
-      // once logged out, change navigation to login
+  // Function for handling the logout
       navigation.replace('Login');
     }).catch(error => {
       Alert.alert('Error', error.message);
