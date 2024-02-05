@@ -80,13 +80,8 @@ export default function AddTaskScreen({ navigation }) {
     // try catch block
     try {
       const newTask = {
-        // add data to the database function - import and use addDoc
-      // title, due date, priority, description, subtasks, userId to reference data to unique uid
         title,
-        dueDate: { 
-          seconds: Math.floor(dueDate.getTime() / 1000), 
-          nanoseconds: (dueDate.getTime() % 1000) * 1000000 
-        }, 
+        dueDate: Timestamp.fromDate(dueDate), // Convert JavaScript Date to Firestore Timestamp
         priority,
         description,
         subtasks,

@@ -5,9 +5,7 @@ import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from "@expo/vector-icons";
-import * as Font from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 // Export Completed Screen
 export default function CompletedScreen({ navigation }) {
   // Declaration of functional components needed for Completed Screen
@@ -16,7 +14,6 @@ export default function CompletedScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const screenWidth = Dimensions.get('window').width;
   const [profileData, setProfileData] = useState(null);
-  
 
   // useFocusEffect - check if current user is auth'ed, if so - fetch completed tasks 
   // see fetchCompletedTasks function
@@ -25,11 +22,10 @@ export default function CompletedScreen({ navigation }) {
       if (auth.currentUser) {
         fetchCompletedTasks();
       }
-      return () => {}; 
     }, [])
   );
 
-  // useFocusEffect to refresh tasks and user profile every time the screen is focused
+  // useFocusEffect for fetching user profile data
   useFocusEffect(
     React.useCallback(() => {
       fetchUserProfile();
@@ -45,7 +41,7 @@ export default function CompletedScreen({ navigation }) {
     }
   };
 
-  // useLayoutEffect for header
+  // Header setup with user profile
   React.useLayoutEffect(() => {
     fetchUserProfile();
     navigation.setOptions({
@@ -63,104 +59,79 @@ export default function CompletedScreen({ navigation }) {
     });
   }, [navigation, profileData]);
 
-  // header options
-  React.useLayoutEffect(() => {
-    const logoWidth = screenWidth * 0.5;
-    const logoHeight = (logoWidth * 424) / 1500; 
-
-    navigation.setOptions({
-      headerTitle: () => (
-        <Text style={styles.headerTitle}>Completed Tasks</Text>
-      ),
-      headerStyle: {
-        backgroundColor: '#0080FF',
-        borderBottomWidth: 0,
-      },
-      headerTitleContainerStyle: {
-        left: 0,
-        right: 0,
-      },
-      headerShadowVisible: false,
-    });
-  }, [navigation]);  
-
+    // header options
+    React.useLayoutEffect(() => {
+      const logoWidth = screenWidth * 0.5;
+      const logoHeight = (logoWidth * 424) / 1500; 
+  
+      navigation.setOptions({
+        headerTitle: () => (
+          <Text style={styles.headerTitle}>Completed Tasks</Text>
+        ),
+        headerStyle: {
+          backgroundColor: '#0080FF',
+          borderBottomWidth: 0,
+        },
+        headerTitleContainerStyle: {
+          left: 0,
+          right: 0,
+        },
+        headerShadowVisible: false,
+      });
+    }, [navigation]);
+    
+  // Function to fetch completed tasks
   const fetchCompletedTasks = async () => {
     // Setting loading state to true at the beginning of the function
     setLoading(true);
     const userId = auth.currentUser.uid;
-    console.log("Fetching completed tasks for user ID:", userId);
-  
+
     try {
-      console.log("Fetching tasks from Firebase...");
-      // Creating a query to fetch tasks from the 'completed' collection in Firebase Firestore
       const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
-      
-      // Executing the query and getting a snapshot of the data
       const querySnapshot = await getDocs(completedTasksQuery);
-      console.log("Query Snapshot:", querySnapshot);
-  
+
       if (!querySnapshot.empty) {
-        // If the query returned data, map through each document in the snapshot
-        const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("Fetched Completed Tasks from Firebase:", tasksArr);
-        
-        // Setting the state with the fetched tasks array
+        const tasksArr = querySnapshot.docs.map(doc => {
+          const task = doc.data();
+          // Convert Firestore Timestamp to JavaScript Date object for display
+          const dueDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
+          return { id: doc.id, ...task, dueDate };
+        });
+
         setCompletedTasks(tasksArr);
-        
-        // Updating AsyncStorage with the latest fetched data for offline access
         await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
       } else {
-        // If no documents were returned by the query
-        console.log("No completed tasks found in Firebase for this user.");
-        
-        // Clearing the tasks in the state if none were found in Firebase
         setCompletedTasks([]);
       }
     } catch (error) {
-      // Handling any errors that occur during the fetch process
-      console.error("Error fetching completed tasks: ", error);
       Alert.alert('Error', 'Unable to fetch completed tasks.');
     } finally {
-      // Setting loading state to false at the end of the function
       setLoading(false);
     }
   };
 
-  // function to render the completed task
+  // Function to render completed tasks
   const renderCompletedTask = ({ item }) => (
-    // task container
     <View style={styles.taskItem}>
-        {/* Title of the completed Task */}
-        <Text style={styles.taskTitle}>{item.title}</Text>
-        {/* Task detail section */}
-        <View style={styles.taskDetails}>
-          {/* Text for the date */}
-          <Text style={styles.dateTitle}>
-            Due: {new Date(item.dueDate.seconds * 1000).toLocaleDateString()}
-          </Text>
-          {/* Text for the priority */}
-          <Text style={styles.priorityTitle}>Priority: {item.priority}</Text>
-        </View>
-        {/* Task description container */}
-        <View style={styles.descriptionBox}>
-          <Text style={styles.descriptionText}>
-            {item.description}
-          </Text>
-        </View>
+      <Text style={styles.taskTitle}>{item.title}</Text>
+      <View style={styles.taskDetails}>
+        <Text style={styles.dateTitle}>Due: {item.dueDate.toLocaleDateString()}</Text>
+        <Text style={styles.priorityTitle}>Priority: {item.priority}</Text>
+      </View>
+      <View style={styles.descriptionBox}>
+        <Text style={styles.descriptionText}>{item.description}</Text>
+      </View>
     </View>
   );
 
-  // return block for the UI
+  // Render function for CompletedScreen
   return (
     <View style={styles.container}>
-      {/* If loding, show the loading tasks text */}
       {loading ? (
-        // loading indicator
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFFFFF" />
-      </View>
+        </View>
       ) : (
-        // else show the tasks
         <FlatList
           data={completedTasks}
           renderItem={renderCompletedTask}

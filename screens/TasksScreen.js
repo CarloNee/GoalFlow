@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, Image, Dimensions, ActivityIndicator } from "react-native";
 import { db, auth } from "../firebase";
-import { collection, query as firestoreQuery, where, getDocs, doc, deleteDoc, addDoc, getDoc } from "firebase/firestore";
+import { collection, query as firestoreQuery, where, getDocs, doc, deleteDoc, addDoc, getDoc, Timestamp } from "firebase/firestore";
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from "@expo/vector-icons";
 // import { useFonts, FiraSans_800ExtraBold_Italic } from '@expo-google-fonts/fira-sans';
@@ -60,21 +60,26 @@ export default function TasksScreen({ navigation, route }) {
       const unsubscribe = navigation.addListener('focus', () => {
         // Fetch user profile data every time the screen is focused
         fetchUserProfile();
-
-        // Check if a new task has been added and fetch tasks
-        const routeParams = navigation.getState().routes.find(route => route.name === 'TasksScreen')?.params;
-        if (routeParams?.newTaskAdded) {
+  
+        // Get route parameters
+        const routeParams = navigation.getState().routes.find(route => route.name === 'Tasks')?.params;
+  
+        // Check if a new task has been added or a task has been updated
+        if (routeParams?.newTaskAdded || routeParams?.taskUpdated) {
           fetchTasks();
-          // Reset the parameter so it doesn't refetch every time
-          navigation.setParams({ newTaskAdded: false });
+  
+          // Reset the parameters so it doesn't refetch every time
+          navigation.setParams({ newTaskAdded: false, taskUpdated: false });
         } else {
-          // Fetch tasks if not triggered by new task addition
+          // Fetch tasks if not triggered by new task addition or update
           fetchTasks();
         }
       });
+  
       return unsubscribe;
     }, [navigation])
   );
+  
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -162,24 +167,35 @@ export default function TasksScreen({ navigation, route }) {
     }, [])
   );
 
-  // function to place completed task in completed database
-  const completeTask = async (taskId, taskData) => {
-    const userId = auth.currentUser.uid;
-  
-    try {
-      // Update Firebase
-      await addDoc(collection(db, "completed"), taskData);
-      await deleteDoc(doc(db, "tasks", taskId));
-  
-      // Update local state and AsyncStorage
-      const updatedTasks = tasks.filter(task => task.id !== taskId);
-      setTasks(updatedTasks);
-      await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
-    } catch (error) {
-      console.error("Error completing task: ", error);
-      Alert.alert("Error", "Unable to complete task.");
-    }
-  };
+// Function to mark a task as completed
+const completeTask = async (taskId, taskData) => {
+  const userId = auth.currentUser.uid;
+
+  try {
+    // Convert the JavaScript Date object to Firestore Timestamp
+    const firestoreTimestamp = taskData.dueDate instanceof Date ? 
+      Timestamp.fromDate(taskData.dueDate) : 
+      new Timestamp(taskData.dueDate.seconds, taskData.dueDate.nanoseconds);
+
+    // Prepare the task data for storage in the 'completed' collection
+    const completedTaskData = {
+      ...taskData,
+      dueDate: firestoreTimestamp
+    };
+
+    // Add to the 'completed' collection and delete from the 'tasks' collection
+    await addDoc(collection(db, "completed"), completedTaskData);
+    await deleteDoc(doc(db, "tasks", taskId));
+
+    // Update local state and AsyncStorage (if necessary)
+    const updatedTasks = tasks.filter(task => task.id !== taskId);
+    setTasks(updatedTasks);
+    await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+  } catch (error) {
+    console.error("Error completing task: ", error);
+    Alert.alert("Error", "Unable to complete task.");
+  }
+};
 
   // function to delete task
   const deleteTask = async (taskId) => {

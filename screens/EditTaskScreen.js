@@ -7,8 +7,6 @@ import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 
 // Export EditTaskScreen
 export default function EditTaskScreen({ route, navigation }) {
-  // Declaration of components
-  // taskId - route.params, title, due date, priority, description, subtasks
   const { taskId } = route.params;
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState(new Date());
@@ -16,28 +14,21 @@ export default function EditTaskScreen({ route, navigation }) {
   const [description, setDescription] = useState('');
   const [subtasks, setSubtasks] = useState([]);
 
-  // UseEffect to fetch tasks from the 'tasks' database
   useEffect(() => {
     const fetchTask = async () => {
-      // try catch block
       try {
         const docRef = doc(db, 'tasks', taskId);
         const docSnap = await getDoc(docRef);
-  
-        // if docSnap.exists - set various components based on what user enters
-        // title, priority, description, subtasks
+
         if (docSnap.exists()) {
           const task = docSnap.data();
           setTitle(task.title);
           setPriority(task.priority);
           setDescription(task.description);
           setSubtasks(task.subtasks || []);
-  
-          // new due date if user changes the due date
-          let firestoreDate = new Date();
-          if (task.dueDate) {
-            firestoreDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate);
-          }
+
+          // Convert Firestore Timestamp to JavaScript Date object
+          const firestoreDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
           setDueDate(firestoreDate);
         } else {
           Alert.alert('Error', 'Task not found.');
@@ -47,10 +38,11 @@ export default function EditTaskScreen({ route, navigation }) {
         Alert.alert('Error', error.message);
       }
     };
-  
+
     fetchTask();
   }, [taskId, navigation]);
 
+  // function to handle updating tasks
   const handleUpdateTask = async () => {
     if (!title) {
       Alert.alert('Error', 'Please enter a title for the task.');
@@ -58,27 +50,28 @@ export default function EditTaskScreen({ route, navigation }) {
     }
   
     try {
-      // Convert JavaScript Date object to Firestore Timestamp
+      // Convert JavaScript Date to Firestore Timestamp
       const firestoreTimestamp = Timestamp.fromDate(dueDate);
   
       const taskRef = doc(db, 'tasks', taskId);
       await updateDoc(taskRef, {
         title,
-        dueDate: firestoreTimestamp, // Update with Firestore Timestamp
+        dueDate: firestoreTimestamp,
         priority,
         description,
         subtasks,
       });
   
       Alert.alert('Success', 'Task updated successfully.');
+  
+      // Go back to TasksScreen and indicate that a task has been updated
       navigation.goBack();
+      navigation.navigate('Tasks', { taskUpdated: true });
     } catch (error) {
       Alert.alert('Error', error.message);
     }
   };
 
-  // function to render the input for subtasks
-  // feature not working - needs work done
   const renderSubtaskInputs = () => {
     return subtasks.map((subtask, index) => (
       <TextInput
@@ -95,17 +88,17 @@ export default function EditTaskScreen({ route, navigation }) {
     ));
   };
 
-  // return block for UI
+  // Render function for EditTaskScreen
   return (
     <ScrollView style={styles.container}>
-      {/* Title Field */}
+      {/* Title input field */}
       <TextInput
         style={styles.input}
         placeholder="Title"
         value={title}
         onChangeText={setTitle}
       />
-      {/* Date Picker */}
+      {/* Date Picker for task due date */}
       <DateTimePicker
         style={styles.datePicker}
         value={dueDate}
@@ -115,14 +108,14 @@ export default function EditTaskScreen({ route, navigation }) {
           setDueDate(selectedDate || dueDate);
         }}
       />
-      {/* Priority Field */}
+      {/* Priority input field */}
       <TextInput
         style={styles.input}
         placeholder="Priority"
         value={priority}
         onChangeText={setPriority}
       />
-      {/* Description Field */}
+      {/* Description input field */}
       <TextInput
         style={styles.input}
         placeholder="Description"
@@ -131,8 +124,9 @@ export default function EditTaskScreen({ route, navigation }) {
         multiline
         numberOfLines={4}
       />
+      {/* Subtask input fields */}
       {renderSubtaskInputs()}
-      {/* Button to update task - use function handleUpdateTask */}
+      {/* Update task button */}
       <Button title="Update Task" onPress={handleUpdateTask} />
     </ScrollView>
   );
