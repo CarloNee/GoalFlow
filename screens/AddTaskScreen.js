@@ -1,12 +1,13 @@
 // Import section
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, TouchableOpacity, Text, SafeAreaView, ScrollView, Modal, Alert, Dimensions } from "react-native";
+import { View, StyleSheet, TextInput, TouchableOpacity, Text, SafeAreaView, ScrollView, Modal, Alert, Dimensions, Image } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
+import { collection, query, where, getDocs, doc, deleteDoc, addDoc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
 
 // Export AddTaskScreen
 export default function AddTaskScreen({ navigation }) {
@@ -20,20 +21,55 @@ export default function AddTaskScreen({ navigation }) {
   const [isPickerModalVisible, setIsPickerModalVisible] = useState(false);
   const [description, setDescription] = useState("");
   const [subtasks, setSubtasks] = useState([]);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const screenWidth = Dimensions.get('window').width;
 
-  // useLayoutEffect for the header options
+  // Function to fetch user profile data
+  const fetchUserProfile = async () => {
+    const docRef = doc(db, "users", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setProfileData(docSnap.data());
+    }
+  };
+
+  // useLayoutEffect for header
   React.useLayoutEffect(() => {
+    fetchUserProfile();
     navigation.setOptions({
-      headerTitle: "Add a new task",
+      headerRight: () => (
+        profileData?.photoURL ? (
+          <Image
+            source={{ uri: profileData.photoURL }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+        ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
+      ),
+      headerRightContainerStyle: {
+        paddingRight: 10,
+      },
+    });
+  }, [navigation, profileData]);
+
+  // header options
+  React.useLayoutEffect(() => {
+
+    navigation.setOptions({
+      headerTitle: () => (
+        <Text style={styles.headerTitle}>New Task</Text>
+      ),
       headerStyle: {
         backgroundColor: '#0080FF',
-      }, 
-      headerTitleStyle: {
-        color: 'white', 
+        borderBottomWidth: 0,
       },
-      headerTintColor: 'white',
+      headerTitleContainerStyle: {
+        left: 0,
+        right: 0,
+      },
+      headerShadowVisible: false,
     });
-  }, [navigation]);
+  }, [navigation]);  
 
   // function for Adding task to the databasw
   const handleAddTask = async () => {
@@ -188,6 +224,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0080FF', 
+  },
+  // Header title style
+  headerTitle: {
+    textAlign: 'center',
+    fontFamily: 'FiraSans-ExtraBoldItalic',
+    fontSize: 25,
+    color: '#fff',
+  },
+  // Profile image style
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  // Header right container style
+  headerRightContainer: {
+    paddingRight: 10,
+  },
+  // Header title container style
+  headerTitleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   // ScrollView Style
   scrollView: {

@@ -52,6 +52,7 @@ export default function NotesScreen({ navigation }) {
       ),
       headerRightContainerStyle: {
         paddingRight: 10,
+        paddingBottom: 10,
       },
     });
   }, [navigation, profileData]);
@@ -75,37 +76,51 @@ export default function NotesScreen({ navigation }) {
     });
   }, [navigation]);  
 
-// function for fetching notes, either from AsyncStorage or Firebase
-const fetchNotes = async () => {
-  setLoading(true);
-  const userId = auth.currentUser.uid;
+  // function for fetching notes, either from AsyncStorage or Firebase
+  const fetchNotes = async () => {
+    setLoading(true);
+    const userId = auth.currentUser.uid;
 
-  // try to retrieve the cached notes from AsyncStorage
-  const cachedNotes = await AsyncStorage.getItem(`notes_${userId}`);
+    // try to retrieve the cached notes from AsyncStorage
+    const cachedNotes = await AsyncStorage.getItem(`notes_${userId}`);
 
-  // Check if there are cached notes available
-  if (cachedNotes) {
-    // Parse the stringified notes data and update state
-    setNotes(JSON.parse(cachedNotes));
-    setLoading(false);
-  } else {
-    // If no cached data, fetch notes from Firebase
-    try {
-      const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
-      const querySnapshot = await getDocs(notesQuery);
-      const notesArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setNotes(notesArr);
-      // Cache the fetched notes by storing them in AsyncStorage
-      await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArr));
-    } catch (error) {
-      // Handle and display errors related to fetching notes
-      console.error("Error fetching notes: ", error);
-      Alert.alert("Error", "An error occurred while fetching notes.");
-    } finally {
+    // Check if there are cached notes available
+    if (cachedNotes) {
+      // Parse the stringified notes data and update state
+      setNotes(JSON.parse(cachedNotes));
       setLoading(false);
+    } else {
+      // If no cached data, fetch notes from Firebase
+      try {
+        const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
+        const querySnapshot = await getDocs(notesQuery);
+        const notesArr = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setNotes(notesArr);
+        // Cache the fetched notes by storing them in AsyncStorage
+        await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArr));
+      } catch (error) {
+        // Handle and display errors related to fetching notes
+        console.error("Error fetching notes: ", error);
+        Alert.alert("Error", "An error occurred while fetching notes.");
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-};
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const refreshNotes = navigation.addListener('focus', () => {
+        const routeParams = navigation.getState().routes.find(route => route.name === 'Notes')?.params;
+        if (routeParams?.newNoteAdded) {
+          fetchNotes();
+          // Reset the parameter so it doesn't refetch every time
+          navigation.setParams({ newNoteAdded: false });
+        }
+      });
+      return refreshNotes;
+    }, [navigation])
+  );
 
   // function for deleting note
   const deleteNote = async (noteId) => {
