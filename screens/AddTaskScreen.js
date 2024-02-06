@@ -81,7 +81,7 @@ export default function AddTaskScreen({ navigation }) {
     try {
       const newTask = {
         title,
-        dueDate: Timestamp.fromDate(dueDate), // Convert JavaScript Date to Firestore Timestamp
+        dueDate: Timestamp.fromDate(dueDate),
         priority,
         description,
         subtasks,
@@ -89,7 +89,7 @@ export default function AddTaskScreen({ navigation }) {
       };
   
       const docRef = await addDoc(collection(db, "tasks"), newTask);
-      newTask.id = docRef.id; // Set the newly created task ID
+      newTask.id = docRef.id;
   
       // Alert and navigation
       Alert.alert("Success", "Task added successfully.", [

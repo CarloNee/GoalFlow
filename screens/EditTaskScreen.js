@@ -1,9 +1,10 @@
 // Import Section
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, Button, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, TextInput, TouchableOpacity, Text, Alert, ScrollView, SafeAreaView, Dimensions, Image, Button } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { MaterialIcons } from "@expo/vector-icons";
 
 // Export EditTaskScreen
 export default function EditTaskScreen({ route, navigation }) {
@@ -13,6 +14,45 @@ export default function EditTaskScreen({ route, navigation }) {
   const [priority, setPriority] = useState('');
   const [description, setDescription] = useState('');
   const [subtasks, setSubtasks] = useState([]);
+  const [profileData, setProfileData] = useState(null);
+  const screenWidth = Dimensions.get('window').width;
+
+  // Function to fetch user profile data
+  const fetchUserProfile = async () => {
+    const docRef = doc(db, "users", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setProfileData(docSnap.data());
+    }
+  };
+
+  // useLayoutEffect for header and profile image
+  React.useLayoutEffect(() => {
+    fetchUserProfile();
+    navigation.setOptions({
+      headerRight: () => (
+        profileData?.photoURL ? (
+          <Image
+            source={{ uri: profileData.photoURL }}
+            style={styles.profileImage}
+          />
+        ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
+      ),
+      headerRightContainerStyle: styles.headerRightContainer,
+      headerTitle: () => (
+        <Text style={styles.headerTitle}>Edit Task</Text>
+      ),
+      headerStyle: {
+        backgroundColor: '#0080FF',
+        borderBottomWidth: 0,
+      },
+      headerTitleContainerStyle: {
+        left: 0,
+        right: 0,
+      },
+      headerShadowVisible: false,
+    });
+  }, [navigation, profileData]);
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -54,6 +94,7 @@ export default function EditTaskScreen({ route, navigation }) {
       const firestoreTimestamp = Timestamp.fromDate(dueDate);
   
       const taskRef = doc(db, 'tasks', taskId);
+      // update the data in the collection
       await updateDoc(taskRef, {
         title,
         dueDate: firestoreTimestamp,
@@ -72,6 +113,7 @@ export default function EditTaskScreen({ route, navigation }) {
     }
   };
 
+  // Function to render the subtasks input
   const renderSubtaskInputs = () => {
     return subtasks.map((subtask, index) => (
       <TextInput
@@ -90,55 +132,101 @@ export default function EditTaskScreen({ route, navigation }) {
 
   // Render function for EditTaskScreen
   return (
-    <ScrollView style={styles.container}>
-      {/* Title input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        value={title}
-        onChangeText={setTitle}
-      />
-      {/* Date Picker for task due date */}
-      <DateTimePicker
-        style={styles.datePicker}
-        value={dueDate}
-        mode="date"
-        display="default"
-        onChange={(event, selectedDate) => {
-          setDueDate(selectedDate || dueDate);
-        }}
-      />
-      {/* Priority input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Priority"
-        value={priority}
-        onChangeText={setPriority}
-      />
-      {/* Description input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-      />
-      {/* Subtask input fields */}
-      {renderSubtaskInputs()}
-      {/* Update task button */}
-      <Button title="Update Task" onPress={handleUpdateTask} />
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+
+        {/* Title input field */}
+        <Text style={styles.labelText}>Title:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Title"
+          value={title}
+          onChangeText={setTitle}
+        />
+
+        {/* Date Picker for task due date */}
+        <Text style={styles.labelText}>Due Date:</Text>
+        <DateTimePicker
+          style={styles.datePicker}
+          value={dueDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setDueDate(selectedDate || dueDate);
+          }}
+        />
+
+        {/* Priority input field */}
+        <Text style={styles.labelText}>Priority:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Priority"
+          value={priority}
+          onChangeText={setPriority}
+        />
+
+        {/* Description input field */}
+        <Text style={styles.labelText}>Description:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={4}
+        />
+
+        {/* Subtask input fields */}
+        {renderSubtaskInputs()}
+
+        {/* Update task button */}
+        <TouchableOpacity style={styles.buttonContainer} onPress={handleUpdateTask}>
+          <Text style={styles.buttonText}>Update Task</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 // StyleSheet
 const styles = StyleSheet.create({
-  // Container style
+  // Container Style
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5', 
+    backgroundColor: '#0080FF', 
+  },
+  // Header title style
+  headerTitle: {
+    textAlign: 'center',
+    fontFamily: 'FiraSans-ExtraBoldItalic',
+    fontSize: 25,
+    color: '#fff',
+  },
+  // Profile image style
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  // Header right container style
+  headerRightContainer: {
+    paddingRight: 10,
+  },
+  // Header title container style
+  headerTitleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // ScrollView Style
+  scrollView: {
+    paddingHorizontal: 20,
+  },
+  // Label text style
+  labelText: {
+    fontSize: 15,
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   // All input styling
   input: {
@@ -154,12 +242,19 @@ const styles = StyleSheet.create({
   datePicker: {
     width: '100%',
     marginVertical: 10,
+    textAlign: "center"
   },
   // Update task button styling 
-  button: {
-    backgroundColor: '#0080FF', 
-    color: '#FFFFFF',
-    padding: 10,
+  buttonContainer: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    marginVertical: 10
+  },
+  // Button text style
+  buttonText: {
+    color: '#0080FF',
+    fontSize: 18
   },
 });
