@@ -38,6 +38,11 @@ export default function EditTaskScreen({ route, navigation }) {
           />
         ) : <MaterialIcons name="account-circle" size={40} color="#fff" />
       ),
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.navigate('Tasks')} style={styles.backButton}>
+          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      ),
       headerRightContainerStyle: styles.headerRightContainer,
       headerTitle: () => (
         <Text style={styles.headerTitle}>Edit Task</Text>
@@ -72,7 +77,7 @@ export default function EditTaskScreen({ route, navigation }) {
           setDueDate(firestoreDate);
         } else {
           Alert.alert('Error', 'Task not found.');
-          navigation.goBack();
+          navigation.navigate("Tasks");
         }
       } catch (error) {
         Alert.alert('Error', error.message);
@@ -207,6 +212,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  // Header left back button style
+  backButton: {
+    marginLeft: 10,
   },
   // Header right container style
   headerRightContainer: {
