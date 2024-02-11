@@ -22,21 +22,29 @@ export default function ProfileScreen({ navigation }) {
 
   // fetch data, need to fetch the users details from the 'users' database
   useEffect(() => {
+    // Async function to fetch user data
     const fetchData = async () => {
+      // retrieve the user's profile data from AsyncStorage to minimize database calls
       const cachedProfileData = await AsyncStorage.getItem('profileData');
+      // If there is cached data, parse and set it to state
       if (cachedProfileData !== null) {
         setProfileData(JSON.parse(cachedProfileData));
       } else {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+        // Reference to the user's document in Firestore
+        const docRef = doc(db, "users", user.uid); 
+        // Snapshot of the document for the current user
+        const docSnap = await getDoc(docRef); 
         if (docSnap.exists()) {
-          setProfileData(docSnap.data());
+          // Set the user's data in state
+          setProfileData(docSnap.data()); 
+          // Store the user's data in AsyncStorage for future quick access
           await AsyncStorage.setItem('profileData', JSON.stringify(docSnap.data()));
         }
       }
     };
-    fetchData();
-  }, []);
+    // Call the fetchData function to execute on component mount
+    fetchData(); 
+  }, []); 
 
   // function for handling the profile picture selection
   const handleImagePick = async () => {
@@ -120,7 +128,7 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  // function handling the deletion of an account
+  // function handling the deletion of an account (screen functionality)
   const handleDeleteAccount = () => {
     // show alert to the user with cancel and delete options
     Alert.alert(
@@ -135,7 +143,7 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
-  // function to delete the user's account
+  // function to delete the user's account from firebase user 
   const deleteUserAccount = async () => {
     try {
       // Delete user data from Firestore

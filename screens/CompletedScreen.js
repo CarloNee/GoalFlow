@@ -80,35 +80,47 @@ export default function CompletedScreen({ navigation }) {
       });
     }, [navigation]);
     
-  // Function to fetch completed tasks
-  const fetchCompletedTasks = async () => {
-    // Setting loading state to true at the beginning of the function
-    setLoading(true);
-    const userId = auth.currentUser.uid;
+// Function to fetch completed tasks from Firebase and store them in local AsyncStorage
+const fetchCompletedTasks = async () => {
+  // setLoading - true
+  setLoading(true);
 
-    try {
-      const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
-      const querySnapshot = await getDocs(completedTasksQuery);
+  // Retrieve the unique user ID 
+  const userId = auth.currentUser.uid;
 
-      if (!querySnapshot.empty) {
-        const tasksArr = querySnapshot.docs.map(doc => {
-          const task = doc.data();
-          // Convert Firestore Timestamp to JavaScript Date object for display
-          const dueDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
-          return { id: doc.id, ...task, dueDate };
-        });
+  try {
+    // query to retrieve tasks marked as completed by the current user
+    const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
 
-        setCompletedTasks(tasksArr);
-        await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
-      } else {
-        setCompletedTasks([]);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to fetch completed tasks.');
-    } finally {
-      setLoading(false);
+    const querySnapshot = await getDocs(completedTasksQuery);
+
+    // Check if the query returned any documents
+    if (!querySnapshot.empty) {
+      // Transform the query results into an array of task objects
+      const tasksArr = querySnapshot.docs.map(doc => {
+        const task = doc.data();
+        // Convert Firestore Timestamp to a JavaScript Date object for display
+        const dueDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
+        // Return a task object including the document ID and the formatted due date
+        return { id: doc.id, ...task, dueDate };
+      });
+
+      // Update the state with the fetched tasks array
+      setCompletedTasks(tasksArr);
+      // Store the fetched tasks in AsyncStorage
+      await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
+    } else {
+      // If no tasks were returned, set the completed tasks state to an empty array
+      setCompletedTasks([]);
     }
-  };
+  } catch (error) {
+    // Alert if error occurs
+    Alert.alert('Error', 'Unable to fetch completed tasks.');
+  } finally {
+    //setloading to false once completed
+    setLoading(false);
+  }
+};
 
   // Function to render completed tasks
   const renderCompletedTask = ({ item }) => (
