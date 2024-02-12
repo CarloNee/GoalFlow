@@ -15,13 +15,18 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.carlodev.Goalflow"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.carlodev.Goalflow"
     },
     "web": {
       "favicon": "./assets/icon.png"
@@ -40,6 +45,17 @@
           "contactsPermission": "Our great calendar app wants to access your contacts"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b1628667-74a5-4735-8244-b1f31dd56016"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b1628667-74a5-4735-8244-b1f31dd56016"
+    }
   }
 }
