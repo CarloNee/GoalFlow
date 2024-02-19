@@ -79,7 +79,6 @@ export default function ProfileScreen({ navigation }) {
         resolve(xhr.response);
       };
       xhr.onerror = function (e) {
-        console.log(e);
         reject(new TypeError("Network request failed"));
       };
       xhr.responseType = "blob";
@@ -115,7 +114,6 @@ export default function ProfileScreen({ navigation }) {
     try {
       // Clear AsyncStorage data
       await AsyncStorage.clear();
-      console.log('AsyncStorage has been cleared.');
 
       // Perform Firebase sign out
       await auth.signOut();

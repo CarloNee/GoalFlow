@@ -1,6 +1,6 @@
 // Import section
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, Image, Dimensions, ActivityIndicator } from "react-native";
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, Image, Dimensions, ActivityIndicator, RefreshControl } from "react-native";
 import { db, auth } from "../firebase";
 import { collection, query as firestoreQuery, where, getDocs, doc, deleteDoc, addDoc, getDoc, Timestamp } from "firebase/firestore";
 import { useFocusEffect } from '@react-navigation/native';
@@ -16,6 +16,7 @@ export default function TasksScreen({ navigation, route }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const screenWidth = Dimensions.get('window').width;
 
   // Function to fetch user profile data
@@ -63,11 +64,11 @@ export default function TasksScreen({ navigation, route }) {
   
         // Get route parameters
         const routeParams = navigation.getState().routes.find(route => route.name === 'Tasks')?.params;
-  
+        console.log('Route Params:', routeParams);
         // Check if a new task has been added or a task has been updated
         if (routeParams?.newTaskAdded || routeParams?.taskUpdated) {
           fetchTasks();
-  
+          console.log('Route Params:', routeParams);
           // Reset the parameters so it doesn't refetch every time
           navigation.setParams({ newTaskAdded: false, taskUpdated: false });
         } else {
@@ -152,6 +153,7 @@ export default function TasksScreen({ navigation, route }) {
           // Store fetched tasks in AsyncStorage
           await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArr));
         }
+        console.log("Fetching tasks...");
       } catch (error) {
         console.error("Error fetching tasks: ", error);
       } finally {
@@ -257,6 +259,14 @@ const completeTask = async (taskId, taskData) => {
     navigation.navigate("AddTask");
   };
 
+  // function for controlling the pulldown refresh action
+const onRefresh = React.useCallback(async () => {
+  setRefreshing(true);
+  console.log("Refreshing tasks...");
+  await fetchTasks();
+  setRefreshing(false);
+}, [fetchTasks]);
+
   // return block
   return (
     <View style={styles.container}>
@@ -276,11 +286,17 @@ const completeTask = async (taskId, taskData) => {
       </View>
       ) : (
         // If tasks, display the tasks
-        <FlatList
-          data={tasks}
-          renderItem={renderTask}
-          keyExtractor={(item) => item.id}
-        />
+      <FlatList
+        data={tasks}
+        renderItem={renderTask}
+        keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      />
       )}
       {/* Button to navigate to a new task creation - AddTaskScreen */}
       <TouchableOpacity style={styles.fab} onPress={navigateToAddTask}>
