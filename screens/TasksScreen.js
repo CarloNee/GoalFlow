@@ -145,14 +145,16 @@ export default function TasksScreen({ navigation, route }) {
 
         const querySnapshot = await getDocs(tasksQuery);
         const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id,...doc.data(),}));
-
         setTasks(tasksArr);
+
         // Update AsyncStorage with the latest data
         await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArr));
+
       } catch (error) {
         console.error("Error fetching tasks: ", error);
         // Fall back to using AsyncStorage data in case of an error
         const storedTasks = await AsyncStorage.getItem(`tasks_${userId}`);
+        
         if (storedTasks !== null) {
           setTasks(JSON.parse(storedTasks));
         }
