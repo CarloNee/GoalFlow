@@ -14,9 +14,6 @@ export default function EditTaskScreen({ route, navigation }) {
   const [dueDate, setDueDate] = useState(new Date());
   const [priority, setPriority] = useState("");
   const [description, setDescription] = useState("");
-  const [subtasks, setSubtasks] = useState([]);
-  const [showPriorityPicker, setShowPriorityPicker] = useState(false);
-  const [isPickerModalVisible, setIsPickerModalVisible] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const screenWidth = Dimensions.get("window").width;
 
@@ -75,7 +72,6 @@ export default function EditTaskScreen({ route, navigation }) {
           setTitle(task.title);
           setPriority(task.priority);
           setDescription(task.description);
-          setSubtasks(task.subtasks || []);
 
           // Convert Firestore Timestamp to JavaScript Date object
           const firestoreDate = task.dueDate.toDate
@@ -112,7 +108,6 @@ export default function EditTaskScreen({ route, navigation }) {
         dueDate: firestoreTimestamp,
         priority,
         description,
-        subtasks,
       });
 
       Alert.alert("Success", "Task updated successfully.");
@@ -125,34 +120,33 @@ export default function EditTaskScreen({ route, navigation }) {
     }
   };
 
-  // Function to render the subtasks input
-  const renderSubtaskInputs = () => {
-    return subtasks.map((subtask, index) => (
-      <TextInput
-        key={index}
-        style={styles.input}
-        placeholder={`Subtask ${index + 1}`}
-        value={subtask}
-        onChangeText={(text) => {
-          let newSubtasks = [...subtasks];
-          newSubtasks[index] = text;
-          setSubtasks(newSubtasks);
-        }}
-      />
-    ));
+  // Function to handle priority selection
+  const selectPriority = (selectedPriority) => {
+    setPriority(selectedPriority);
   };
 
-  // function for toggling the 'priority picker' using the PickerModal
-  const handlePickerModalToggle = () => {
-    setIsPickerModalVisible(!isPickerModalVisible);
+  // Get style based on priority
+  const getPriorityStyle = (prio) => {
+    switch (prio) {
+      case "None":
+        return { backgroundColor: '#8c8f8d', textColor: '#f0f0f0' };
+      case "Low":
+        return { backgroundColor: '#3cde72', textColor: '#d4f2e7' };
+      case "Medium":
+        return { backgroundColor: '#de953c', textColor: '#f3e1cb' };
+      case "High":
+        return { backgroundColor: '#db2121', textColor: '#f3c1c1' };
+      default:
+        return { backgroundColor: '#e0e0e0', textColor: '#333' };
+    }
   };
 
   // Render function for EditTaskScreen
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
+
         {/* Title input field */}
-        <Text style={styles.labelText}>Title:</Text>
         <TextInput
           style={styles.input}
           placeholder="Title"
@@ -160,9 +154,19 @@ export default function EditTaskScreen({ route, navigation }) {
           onChangeText={setTitle}
         />
 
-        {/* Date Picker */}
+        {/* Description input field */}
+        <TextInput
+          style={[styles.input, styles.inputDescription]}
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={4}
+        />
+
+        {/* Due Date Picker and Label */}
         <View style={styles.datePickerContainer}>
-          <Text>Due Date:</Text>
+          <Text style={styles.datePickerLabel}>Due Date:</Text>
           <DateTimePicker
             style={styles.datePicker}
             value={dueDate}
@@ -172,61 +176,31 @@ export default function EditTaskScreen({ route, navigation }) {
               setDueDate(selectedDate || dueDate);
             }}
           />
-        </View>
+        </View> 
 
-        {/* Priority Modal Touchable Opacity for user to press on the Priority Modal */}
-        <TouchableOpacity
-          style={styles.priorityField}
-          onPress={handlePickerModalToggle}
-        >
-          {/* If no priority selected, priority is none */}
-          <Text style={styles.inputText}>
-            {priority !== "None" ? priority : "Select Priority"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Priority Picker Modal */}
-        <Modal
-          transparent={true}
-          visible={isPickerModalVisible}
-          onRequestClose={handlePickerModalToggle}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+        {/* Priority Selection */}
+        <View style={styles.prioritySelectionContainer}>
+          <Text style={styles.priorityLabel}>Priority:</Text>
+          <View style={styles.priorityOptions}>
+            {["None", "Low", "Medium", "High"].map((prio, index) => (
               <TouchableOpacity
-                style={styles.modalButton}
-                onPress={handlePickerModalToggle}
+                key={index}
+                style={[
+                  styles.priorityOption,
+                  { backgroundColor: priority === prio ? getPriorityStyle(prio).backgroundColor : 'transparent' }
+                ]}
+                onPress={() => selectPriority(prio)}
               >
-                <Text style={styles.modalButtonText}>Done</Text>
+                <Text style={[
+                  styles.priorityOptionText,
+                  { color: priority === prio ? getPriorityStyle(prio).textColor : '#333' }
+                ]}>
+                  {prio}
+                </Text>
               </TouchableOpacity>
-              {/* Priority options */}
-              <Picker
-                selectedValue={priority}
-                style={styles.picker}
-                onValueChange={(itemValue) => setPriority(itemValue)}
-              >
-                <Picker.Item label="None" value="None" />
-                <Picker.Item label="Low" value="Low" />
-                <Picker.Item label="Medium" value="Medium" />
-                <Picker.Item label="High" value="High" />
-              </Picker>
-            </View>
+            ))}
           </View>
-        </Modal>
-
-        {/* Description input field */}
-        <Text style={styles.labelText}>Description:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Description"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={4}
-        />
-
-        {/* Subtask input fields */}
-        {renderSubtaskInputs()}
+        </View>
 
         {/* Update task button */}
         <TouchableOpacity
@@ -245,7 +219,7 @@ const styles = StyleSheet.create({
   // Container Style
   container: {
     flex: 1,
-    backgroundColor: "#0080FF",
+    backgroundColor: '#f7f7f7', 
   },
   // Header title style
   headerTitle: {
@@ -287,78 +261,78 @@ const styles = StyleSheet.create({
   // All input styling
   input: {
     width: "100%",
-    padding: 10,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
-    borderRadius: 5,
-  },
-  // Container style for the date picker
-  datePickerContainer: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 10,
-    alignItems: "center",
-  },
-  // Date Picker style
-  datePicker: {
-    width: "100%",
-    padding: 10,
-    marginVertical: 10,
-  },
-  // Priority Field style
-  priorityField: {
-    width: "100%",
     padding: 15,
     marginVertical: 10,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 10,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
+    backgroundColor: '#FFFFFF',
   },
-  // Picker style
-  picker: {
-    width: "100%",
-    height: 150,
+  // input description individual style
+  inputDescription: {
+    minHeight: 120,
   },
-  // Modal Container Style
-  modalContainer: {
+  // date picker container style
+  datePickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 10,
+  },
+  // date picker label style
+  datePickerLabel: {
+    fontSize: 16,
+    color: "#333",
+  },
+  // date picker style
+  datePicker: {
     flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  // Modal Content Style
-  modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+  // priority selection container style
+  prioritySelectionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
   },
-  // Modal button style
-  modalButton: {
-    alignItems: "center",
-    marginTop: 10,
+  // priority label style
+  priorityLabel: {
+    fontSize: 16,
+    color: "#333",
+    marginRight: 10,
   },
-  // Modal button text style
-  modalButtonText: {
-    fontSize: 18,
-    color: "#007AFF",
+  // priority options style
+  priorityOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    flex: 1,
+  },
+  // priority option selected style
+  priorityOption: {
+    padding: 10,
+    borderRadius: 10,
+    width: '25%',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  // priority option text style
+  priorityOptionText: {
+    fontSize: 15,
   },
   // Update task button styling
   buttonContainer: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#0080FF',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
     alignItems: "center",
-    marginVertical: 10,
   },
   // Button text style
   buttonText: {
-    color: "#0080FF",
+    color: "white",
     fontSize: 18,
+    fontWeight: "bold",
   },
 });

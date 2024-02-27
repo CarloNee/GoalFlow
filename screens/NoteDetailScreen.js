@@ -13,6 +13,7 @@ export default function NoteDetailScreen({ route, navigation }) {
   const { noteId } = route.params;
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [note, setNote] = useState({ title: '', content: '' });
 
   useEffect(() => {
     // fetch note from the database 'notes'
@@ -23,7 +24,7 @@ export default function NoteDetailScreen({ route, navigation }) {
 
         // if note exists
         if (noteSnap.exists()) {
-          setContent(noteSnap.data().content);
+          setNote({ title: noteSnap.data().title, content: noteSnap.data().content });
           setIsEditing(true);
           // else display error 
         } else {
@@ -40,18 +41,27 @@ export default function NoteDetailScreen({ route, navigation }) {
 
     // Navigation - either save note or delete note icons on header top right
     navigation.setOptions({
+      headerTitle: note.title,
+      headerLeft: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={styles.backButton}
+        >
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <View style={styles.headerButtons}>
           <TouchableOpacity onPress={handleSaveChanges}>
-            <MaterialIcons name="save" size={24} color="#007AFF" />
+            <MaterialIcons name="save-alt" size={24} color="#007AFF" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleDeleteNote} style={styles.deleteButton}>
-            <MaterialIcons name="delete" size={24} color="#FF3B30" />
+          <TouchableOpacity onPress={handleDeleteNote}>
+            <MaterialIcons name="delete-outline" size={24} color="#FF3B30" />
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [noteId, navigation]);
+  }, [noteId, navigation, note.title]);
 
   // function to handle the saving of changes
   const handleSaveChanges = async () => {
@@ -92,21 +102,10 @@ export default function NoteDetailScreen({ route, navigation }) {
         style={styles.input}
         multiline
         editable={isEditing}
-        onChangeText={setContent}
-        value={content}
+        onChangeText={(text) => setNote({ ...note, content: text })}
+        value={note.content}
         placeholder="Write your note..."
-        placeholderTextColor="#C7C7C7"
       />
-
-      {/* Action Bar */}
-      <View style={styles.actionBar}>
-        <TouchableOpacity style={styles.actionButton} onPress={handleSaveChanges}>
-          <Text style={styles.actionButtonText}>Save</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={handleDeleteNote}>
-          <Text style={styles.actionButtonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -118,35 +117,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     paddingHorizontal: 20,
   },
+  backButton: {
+    marginLeft: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  backButtonText: {
+    color: '#0080FF', 
+    fontSize: 20,
+  },
   input: {
     flex: 1,
-    marginTop: 30,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
     backgroundColor: '#FFF',
     fontSize: 18,
     lineHeight: 28,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E1E1E1',
-    color: '#333',
+    padding: 10,
   },
-  actionBar: {
+  headerButtons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingVertical: 15,
-  },
-  actionButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginHorizontal: 10,
-    borderRadius: 8,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  deleteButton: {
-    color: '#FF3B30',
+    margin: 10,
+    justifyContent: 'space-between',
+    width: 60,
   },
 });

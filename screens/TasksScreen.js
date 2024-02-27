@@ -1,12 +1,16 @@
 // Import section
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert, Image, Dimensions, ActivityIndicator, RefreshControl } from "react-native";
+import { View, StyleSheet, FlatList, Text, TextInput, TouchableOpacity, Alert, Image, Dimensions, ActivityIndicator, RefreshControl } from "react-native";
 import { db, auth } from "../firebase";
 import { collection, query as firestoreQuery, where, getDocs, doc, deleteDoc, addDoc, getDoc, Timestamp } from "firebase/firestore";
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from "@expo/vector-icons";
 // import { useFonts, FiraSans_800ExtraBold_Italic } from '@expo-google-fonts/fira-sans';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LottieView from 'lottie-react-native';
+// Celebration animation taken from https://lottiefiles.com/animations/bluecomplete-xFRAfv5Wy9?from=search. Credit to the Author for creating the animation and the JSON file
+import celebrationAnimation from '../celebration.json';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 // Export TasksScreen
 export default function TasksScreen({ navigation, route }) {
@@ -18,6 +22,7 @@ export default function TasksScreen({ navigation, route }) {
   const [profileData, setProfileData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const screenWidth = Dimensions.get('window').width;
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
@@ -130,32 +135,27 @@ export default function TasksScreen({ navigation, route }) {
     if (auth.currentUser) {
       setLoading(true);
       const userId = auth.currentUser.uid;
-  
+
       try {
-        // Check AsyncStorage first
+        // Fetch from Firebase
+        const tasksQuery = firestoreQuery(
+          collection(db, "tasks"),
+          where("userId", "==", userId)
+        );
+
+        const querySnapshot = await getDocs(tasksQuery);
+        const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id,...doc.data(),}));
+
+        setTasks(tasksArr);
+        // Update AsyncStorage with the latest data
+        await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArr));
+      } catch (error) {
+        console.error("Error fetching tasks: ", error);
+        // Fall back to using AsyncStorage data in case of an error
         const storedTasks = await AsyncStorage.getItem(`tasks_${userId}`);
         if (storedTasks !== null) {
           setTasks(JSON.parse(storedTasks));
-        } else {
-          // Fetch from Firebase if not in AsyncStorage
-          const tasksQuery = firestoreQuery(
-            collection(db, "tasks"),
-            where("userId", "==", userId)
-          );
-  
-          const querySnapshot = await getDocs(tasksQuery);
-          const tasksArr = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-  
-          setTasks(tasksArr);
-          // Store fetched tasks in AsyncStorage
-          await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArr));
         }
-        console.log("Fetching tasks...");
-      } catch (error) {
-        console.error("Error fetching tasks: ", error);
       } finally {
         setLoading(false);
       }
@@ -193,6 +193,8 @@ const completeTask = async (taskId, taskData) => {
     const updatedTasks = tasks.filter(task => task.id !== taskId);
     setTasks(updatedTasks);
     await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+    setShowCelebration(true); 
+    setTimeout(() => setShowCelebration(false), 3000);
   } catch (error) {
     console.error("Error completing task: ", error);
     Alert.alert("Error", "Unable to complete task.");
@@ -217,42 +219,68 @@ const completeTask = async (taskId, taskData) => {
     }
   };
 
+  // Function to get priority style based on priority
+  const getPriorityStyle = (priority) => {
+    switch (priority) {
+      case "None":
+        return { color: '#8c8f8d', circleColor: '#8c8f8d' };
+      case "Low":
+        return { color: '#3cde72', circleColor: '#3cde72' };
+      case "Medium":
+        return { color: '#de953c', circleColor: '#de953c' };
+      case "High":
+        return { color: '#db2121', circleColor: '#db2121' };
+      default:
+        return { color: '#e0e0e0', circleColor: '#e0e0e0' };
+    }
+  };
+
   // function for rendering task
-  const renderTask = ({ item }) => (
-    <View style={styles.taskItem}>
-      {/* container can be pressed, taking user to the edit task screen */}
-      <TouchableOpacity onPress={() => navigation.navigate("EditTask", { taskId: item.id })}>
-        {/* task title */}
-        <Text style={styles.taskTitle}>{item.title}</Text>
-        {/* task details */}
-        <View style={styles.taskDetails}>
-          {/* date */}
-          <Text style={styles.dateTitle}>
-            Due: {item.dueDate.toDate ? item.dueDate.toDate().toLocaleDateString() : new Date(item.dueDate.seconds * 1000).toLocaleDateString()}
-          </Text>
-          {/* priority */}
-          <Text style={styles.priorityTitle}>Priority: {item.priority}</Text>
-        </View>
-        {/* description */}
-        <View style={styles.descriptionBox}>
-          <Text style={styles.descriptionText}>
-            {item.description}
-          </Text>
-        </View>
-      </TouchableOpacity>
-      {/* buttons */}
-      <View style={styles.taskButtons}>
-        {/* complete task */}
-        <TouchableOpacity style={styles.completeButton} onPress={() => completeTask(item.id, item)}>
-          <MaterialIcons name="check" size={24} color="white" />
+  const renderTask = ({ item }) => {
+    const priorityStyle = getPriorityStyle(item.priority);
+    return (
+      <View style={styles.taskItem}>
+        {/* container can be pressed, taking user to the edit task screen */}
+        <TouchableOpacity onPress={() => navigation.navigate("EditTask", { taskId: item.id })}>
+          {/* task title */}
+          <Text style={styles.taskTitle}>{item.title}</Text>
+          {/* task details */}
+          <View style={styles.taskDetails}>
+            {/* date */}
+            <Text style={styles.dateTitle}>
+              Due: {item.dueDate.toDate ? item.dueDate.toDate().toLocaleDateString() : new Date(item.dueDate.seconds * 1000).toLocaleDateString()}
+            </Text>
+            {/* priority */}
+            <View style={styles.priorityContainer}>
+              <View style={[styles.priorityCircle, { backgroundColor: priorityStyle.circleColor }]} />
+              <Text style={{ ...styles.priorityTitle, color: priorityStyle.color }}>
+                {item.priority}
+              </Text>
+            </View>
+          </View>
+          {/* description */}
+          <TextInput
+            style={styles.descriptionInput}
+            value={item.description}
+            editable={false} 
+            multiline
+            numberOfLines={4} 
+          />
         </TouchableOpacity>
-        {/* delete task */}
-        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteTask(item.id)}>
-          <MaterialIcons name="delete" size={24} color="white" />
-        </TouchableOpacity>
+        {/* buttons */}
+        <View style={styles.taskButtons}>
+          {/* complete task */}
+          <TouchableOpacity style={styles.completeButton} onPress={() => completeTask(item.id, item)}>
+            <MaterialIcons name="check" size={24} color="white" />
+          </TouchableOpacity>
+          {/* delete task */}
+          <TouchableOpacity style={styles.deleteButton} onPress={() => deleteTask(item.id)}>
+            <MaterialIcons name="delete" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   // function to navigate to add a new task
   const navigateToAddTask = () => {
@@ -302,6 +330,20 @@ const onRefresh = React.useCallback(async () => {
       <TouchableOpacity style={styles.fab} onPress={navigateToAddTask}>
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
+      {/* lottie celebration for the completed task */}
+      {showCelebration && (
+      <>
+      {/* lottie celebration */}
+        <LottieView
+          source={celebrationAnimation}
+          autoPlay
+          loop={false}
+          style={styles.celebrationAnimation}
+        />
+        {/* confetti celebration for completed task */}
+        <ConfettiCannon count={200} origin={{x: -10, y: 0}} fadeOut={true} />
+      </>
+    )}
     </View>
   );
 }
@@ -362,15 +404,35 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
+  // description input text style
+  descriptionInput: {
+    backgroundColor: '#e0e0e0', 
+    padding: 15, 
+    borderRadius: 10,
+    minHeight: 100, 
+    fontSize: 16,
+    color: "#333",
+  },
   // Date title style
   dateTitle: {
     fontSize: 16,
     color: "#333",
   },
-  // Priority title style
+  // priority container style
+  priorityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  // priority circle style
+  priorityCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 5,
+  },
+  // priority titlestyle
   priorityTitle: {
     fontSize: 16,
-    color: "#333",
   },
   // Description box style
   descriptionBox: {
@@ -427,5 +489,11 @@ const styles = StyleSheet.create({
     fontSize: 50,
     color: "#0080FF",
     lineHeight: 56,
+  },
+  // celebration animation style
+  celebrationAnimation: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
 });
