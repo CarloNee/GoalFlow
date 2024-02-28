@@ -306,8 +306,8 @@ const onRefresh = React.useCallback(async () => {
         <Text style={styles.greetingText}>
           Good {getPartOfDay()}, {profileData?.firstName || "User"}
         </Text>
-        {/* display how many tasks user has currently */}
-        <Text style={styles.taskCountText}>You have {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} currently</Text>
+        {/* display how many tasks user has to do */}
+        <Text style={styles.taskCountText}>You have {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} to do</Text>
       </View>
       {loading ? (
         // Task loading indicator if no tasks entered

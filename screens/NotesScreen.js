@@ -178,8 +178,8 @@ export default function NotesScreen({ navigation }) {
     // Title and Content trimmed so containers are the same size, uniformity
     // Title trimmed to first 25 character
     const trimmedTitle = item.title.length > 25 ? item.title.slice(0, 25) + '...' : item.title;
-    // Content trimmed to first 50 characters
-    const trimmedContent = item.content.length > 150 ? item.content.slice(0, 50) + '...' : item.content;
+    // Content trimmed to first 25 characters
+    const trimmedContent = item.content.length > 25 ? item.content.slice(0, 25) + '...' : item.content;
     
     // return block
     return (
@@ -190,7 +190,7 @@ export default function NotesScreen({ navigation }) {
           <Text style={styles.noteContent}>{trimmedContent}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => confirmAndDeleteNote(item.id)} style={styles.deleteIcon}>
-          <MaterialIcons name="delete" size={24} color="red" />
+          <MaterialIcons name="delete-outline" size={24} color="red" />
         </TouchableOpacity>
       </View>
       </ScrollView>
