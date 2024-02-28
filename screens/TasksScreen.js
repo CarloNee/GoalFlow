@@ -9,8 +9,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 // Celebration animation taken from https://lottiefiles.com/animations/bluecomplete-xFRAfv5Wy9?from=search. Credit to the Author for creating the animation and the JSON file
-import celebrationAnimation from '../celebration.json';
-import ConfettiCannon from 'react-native-confetti-cannon';
+import completeAnimation from '../celebration.json';
+import deleteAnimation from '../delete.json';
+// import ConfettiCannon from 'react-native-confetti-cannon';
 
 // Export TasksScreen
 export default function TasksScreen({ navigation, route }) {
@@ -23,6 +24,7 @@ export default function TasksScreen({ navigation, route }) {
   const [refreshing, setRefreshing] = useState(false);
   const screenWidth = Dimensions.get('window').width;
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
@@ -215,6 +217,8 @@ const completeTask = async (taskId, taskData) => {
       const updatedTasks = tasks.filter(task => task.id !== taskId);
       setTasks(updatedTasks);
       await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+      setShowDelete(true); 
+      setTimeout(() => setShowDelete(false), 3000);
     } catch (error) {
       console.error("Error deleting task: ", error);
       Alert.alert("Error", "Unable to delete task.");
@@ -337,15 +341,27 @@ const onRefresh = React.useCallback(async () => {
       <>
       {/* lottie celebration */}
         <LottieView
-          source={celebrationAnimation}
+          source={completeAnimation}
           autoPlay
           loop={false}
-          style={styles.celebrationAnimation}
+          style={styles.completeAnimation}
         />
         {/* confetti celebration for completed task */}
-        <ConfettiCannon count={200} origin={{x: -10, y: 0}} fadeOut={true} />
+        {/* <ConfettiCannon count={200} origin={{x: -10, y: 0}} fadeOut={true} /> */}
       </>
     )}
+    {/* lottie delete for the delete task */}
+    {showDelete && (
+      <>
+      {/* lottie delete */}
+        <LottieView
+          source={deleteAnimation}
+          autoPlay
+          loop={false}
+          style={styles.deleteAnimation}
+        />
+      </>
+    )}    
     </View>
   );
 }
@@ -492,10 +508,20 @@ const styles = StyleSheet.create({
     color: "#0080FF",
     lineHeight: 56,
   },
-  // celebration animation style
-  celebrationAnimation: {
+  // complete animation style
+  completeAnimation: {
     position: 'absolute',
     width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // delete animation style
+  deleteAnimation: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
