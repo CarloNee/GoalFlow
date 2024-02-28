@@ -13,11 +13,28 @@ import completeAnimation from '../celebration.json';
 import deleteAnimation from '../delete.json';
 // import ConfettiCannon from 'react-native-confetti-cannon';
 
+// Helper functions for sorting
+const sortTasksByDueDate = (tasks, ascending = true) => {
+  return tasks.slice().sort((a, b) => {
+    const dateA = a.dueDate.toDate ? a.dueDate.toDate() : new Date(a.dueDate.seconds * 1000);
+    const dateB = b.dueDate.toDate ? b.dueDate.toDate() : new Date(b.dueDate.seconds * 1000);
+    return ascending ? dateA - dateB : dateB - dateA;
+  });
+};
+
+const sortTasksByPriority = (tasks, ascending = true) => {
+  const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1, 'None': 0 };
+  return tasks.slice().sort((a, b) => {
+    const priorityA = priorityOrder[a.priority];
+    const priorityB = priorityOrder[b.priority];
+    return ascending ? priorityA - priorityB : priorityB - priorityA;
+  });
+};
+
 // Export TasksScreen
 export default function TasksScreen({ navigation, route }) {
 
-  // declaration of functional components
-  // tasks, loading, profile data
+  // states and variables declarations
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
@@ -25,6 +42,9 @@ export default function TasksScreen({ navigation, route }) {
   const screenWidth = Dimensions.get('window').width;
   const [showCelebration, setShowCelebration] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [sortedTasks, setSortedTasks] = useState([]);
+  const [sortByDateAscending, setSortByDateAscending] = useState(true);
+  const [sortByPriorityAscending, setSortByPriorityAscending] = useState(true);
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
@@ -75,7 +95,6 @@ export default function TasksScreen({ navigation, route }) {
         // Check if a new task has been added or a task has been updated
         if (routeParams?.newTaskAdded || routeParams?.taskUpdated) {
           fetchTasks();
-          console.log('Route Params:', routeParams);
           // Reset the parameters so it doesn't refetch every time
           navigation.setParams({ newTaskAdded: false, taskUpdated: false });
         } else {
@@ -146,25 +165,28 @@ export default function TasksScreen({ navigation, route }) {
         );
 
         const querySnapshot = await getDocs(tasksQuery);
-        const tasksArr = querySnapshot.docs.map(doc => ({ id: doc.id,...doc.data(),}));
-        setTasks(tasksArr);
+        const fetchedTasks = querySnapshot.docs.map(doc => ({ id: doc.id,...doc.data(),}));
+        setTasks(fetchedTasks);
+        setSortedTasks([...fetchedTasks]);
 
         // Update AsyncStorage with the latest data
-        await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(tasksArr));
+        await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(fetchedTasks));
 
       } catch (error) {
         console.error("Error fetching tasks: ", error);
         // Fall back to using AsyncStorage data in case of an error
         const storedTasks = await AsyncStorage.getItem(`tasks_${userId}`);
-        
-        if (storedTasks !== null) {
-          setTasks(JSON.parse(storedTasks));
+        if (storedTasks) {
+          const storedTasksParsed = JSON.parse(storedTasks);
+          setTasks(storedTasksParsed);
+          setSortedTasks([...storedTasksParsed]);
         }
       } finally {
         setLoading(false);
       }
     }
   };
+
 
   // useFocusEffect to refresh tasks every time the screen is focused
   useFocusEffect(
@@ -197,6 +219,8 @@ const completeTask = async (taskId, taskData) => {
     const updatedTasks = tasks.filter(task => task.id !== taskId);
     setTasks(updatedTasks);
     await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+
+    fetchTasks();
     setShowCelebration(true); 
     setTimeout(() => setShowCelebration(false), 3000);
   } catch (error) {
@@ -217,6 +241,8 @@ const completeTask = async (taskId, taskData) => {
       const updatedTasks = tasks.filter(task => task.id !== taskId);
       setTasks(updatedTasks);
       await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+
+      fetchTasks();
       setShowDelete(true); 
       setTimeout(() => setShowDelete(false), 3000);
     } catch (error) {
@@ -239,6 +265,20 @@ const completeTask = async (taskId, taskData) => {
       default:
         return { color: '#e0e0e0', circleColor: '#e0e0e0' };
     }
+  };
+
+  // Function to handle sorting by due date
+  const handleSortByDueDate = () => {
+    const sorted = sortTasksByDueDate(tasks, sortByDateAscending);
+    setSortedTasks(sorted);
+    setSortByDateAscending(!sortByDateAscending);
+  };
+
+  // Function to handle sorting by priority
+  const handleSortByPriority = () => {
+    const sorted = sortTasksByPriority(tasks, sortByPriorityAscending);
+    setSortedTasks(sorted);
+    setSortByPriorityAscending(!sortByPriorityAscending);
   };
 
   // function for rendering task
@@ -313,6 +353,15 @@ const onRefresh = React.useCallback(async () => {
         {/* display how many tasks user has to do */}
         <Text style={styles.taskCountText}>You have {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} to do</Text>
       </View>
+      {/* Sorting Filters */}
+      <View style={styles.sortingContainer}>
+        <TouchableOpacity onPress={handleSortByDueDate}>
+          <Text style={styles.sortingText}>Due Date {sortByDateAscending ? '↓' : '↑'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSortByPriority}>
+          <Text style={styles.sortingText}>Priority {sortByPriorityAscending ? '↓' : '↑'}</Text>
+        </TouchableOpacity>
+      </View>
       {loading ? (
         // Task loading indicator if no tasks entered
         <View style={styles.loadingContainer}>
@@ -321,7 +370,7 @@ const onRefresh = React.useCallback(async () => {
       ) : (
         // If tasks, display the tasks
       <FlatList
-        data={tasks}
+        data={sortedTasks}
         renderItem={renderTask}
         keyExtractor={(item) => item.id}
         refreshControl={
@@ -524,4 +573,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+// Sorting Container Style
+sortingContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  alignItems: 'center',
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  backgroundColor: '#0066CC',
+  borderRadius: 20,
+  marginVertical: 10,
+  marginHorizontal: 5,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+},
+
+// Sorting Text Style
+sortingText: {
+  fontSize: 18,
+  color: '#FFFFFF',
+  fontWeight: 'bold',
+},
 });

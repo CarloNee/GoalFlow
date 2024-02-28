@@ -80,61 +80,90 @@ export default function CompletedScreen({ navigation }) {
       });
     }, [navigation]);
     
-// Function to fetch completed tasks from Firebase and store them in local AsyncStorage
-const fetchCompletedTasks = async () => {
-  // setLoading - true
-  setLoading(true);
+  // Function to fetch completed tasks from Firebase and store them in local AsyncStorage
+  const fetchCompletedTasks = async () => {
+    // setLoading - true
+    setLoading(true);
 
-  // Retrieve the unique user ID 
-  const userId = auth.currentUser.uid;
+    // Retrieve the unique user ID 
+    const userId = auth.currentUser.uid;
 
-  try {
-    // query to retrieve tasks marked as completed by the current user
-    const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
+    try {
+      // query to retrieve tasks marked as completed by the current user
+      const completedTasksQuery = query(collection(db, 'completed'), where('userId', '==', userId));
 
-    const querySnapshot = await getDocs(completedTasksQuery);
+      const querySnapshot = await getDocs(completedTasksQuery);
 
-    // Check if the query returned any documents
-    if (!querySnapshot.empty) {
-      // Transform the query results into an array of task objects
-      const tasksArr = querySnapshot.docs.map(doc => {
-        const task = doc.data();
-        // Convert Firestore Timestamp to a JavaScript Date object for display
-        const dueDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
-        // Return a task object including the document ID and the formatted due date
-        return { id: doc.id, ...task, dueDate };
-      });
+      // Check if the query returned any documents
+      if (!querySnapshot.empty) {
+        // Transform the query results into an array of task objects
+        const tasksArr = querySnapshot.docs.map(doc => {
+          const task = doc.data();
+          // Convert Firestore Timestamp to a JavaScript Date object for display
+          const dueDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
+          // Return a task object including the document ID and the formatted due date
+          return { id: doc.id, ...task, dueDate };
+        });
 
-      // Update the state with the fetched tasks array
-      setCompletedTasks(tasksArr);
-      // Store the fetched tasks in AsyncStorage
-      await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
-    } else {
-      // If no tasks were returned, set the completed tasks state to an empty array
-      setCompletedTasks([]);
+        // Update the state with the fetched tasks array
+        setCompletedTasks(tasksArr);
+        // Store the fetched tasks in AsyncStorage
+        await AsyncStorage.setItem(`completedTasks_${userId}`, JSON.stringify(tasksArr));
+      } else {
+        // If no tasks were returned, set the completed tasks state to an empty array
+        setCompletedTasks([]);
+      }
+    } catch (error) {
+      // Alert if error occurs
+      Alert.alert('Error', 'Unable to fetch completed tasks.');
+    } finally {
+      //setloading to false once completed
+      setLoading(false);
     }
-  } catch (error) {
-    // Alert if error occurs
-    Alert.alert('Error', 'Unable to fetch completed tasks.');
-  } finally {
-    //setloading to false once completed
-    setLoading(false);
-  }
-};
+  };
+
+  // Function to get priority style based on priority
+  const getPriorityStyle = (priority) => {
+    switch (priority) {
+      case "None":
+        return { color: '#8c8f8d', circleColor: '#8c8f8d' };
+      case "Low":
+        return { color: '#3cde72', circleColor: '#3cde72' };
+      case "Medium":
+        return { color: '#de953c', circleColor: '#de953c' };
+      case "High":
+        return { color: '#db2121', circleColor: '#db2121' };
+      default:
+        return { color: '#e0e0e0', circleColor: '#e0e0e0' };
+    }
+  };
 
   // Function to render completed tasks
-  const renderCompletedTask = ({ item }) => (
-    <View style={styles.taskItem}>
-      <Text style={styles.taskTitle}>{item.title}</Text>
-      <View style={styles.taskDetails}>
-        <Text style={styles.dateTitle}>Due: {item.dueDate.toLocaleDateString()}</Text>
-        <Text style={styles.priorityTitle}>Priority: {item.priority}</Text>
+  const renderCompletedTask = ({ item }) => {
+    const priorityStyle = getPriorityStyle(item.priority); 
+    return (
+      // Task container
+      <View style={styles.taskItem}>
+        {/* title for the task */}
+        <Text style={styles.taskTitle}>{item.title}</Text>
+        {/* Task details section */}
+        <View style={styles.taskDetails}>
+          {/* Task due date */}
+          <Text style={styles.dateTitle}>Due: {item.dueDate.toLocaleDateString()}</Text>
+            {/* priority */}
+            <View style={styles.priorityContainer}>
+              <View style={[styles.priorityCircle, { backgroundColor: priorityStyle.circleColor }]} />
+              <Text style={{ ...styles.priorityTitle, color: priorityStyle.color }}>
+                {item.priority}
+              </Text>
+            </View>
+        </View>
+        <View style={styles.descriptionBox}>
+          <Text style={styles.descriptionText}>{item.description}</Text>
+        </View>
       </View>
-      <View style={styles.descriptionBox}>
-        <Text style={styles.descriptionText}>{item.description}</Text>
-      </View>
-    </View>
-  );
+    )
+  };
 
   // Render function for CompletedScreen
   return (
@@ -221,10 +250,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  // Priority title style
+  // priority container style
+  priorityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  // priority circle style
+  priorityCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 5,
+  },
+  // priority titlestyle
   priorityTitle: {
     fontSize: 16,
-    color: "#333",
   },
   // description container style
   descriptionBox: {
