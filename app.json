@@ -15,8 +15,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.carlodev.Goalflow"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -25,8 +24,7 @@
       },
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.carlodev.Goalflow"
+      ]
     },
     "web": {
       "favicon": "./assets/icon.png"
@@ -48,14 +46,14 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "b1628667-74a5-4735-8244-b1f31dd56016"
+        "projectId": "6878de5e-3610-48f9-a8a3-20a0637f01ec"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/b1628667-74a5-4735-8244-b1f31dd56016"
+      "url": "https://u.expo.dev/6878de5e-3610-48f9-a8a3-20a0637f01ec"
     }
   }
 }
