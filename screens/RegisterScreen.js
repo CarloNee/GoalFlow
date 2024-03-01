@@ -19,7 +19,7 @@ export default function RegisterScreen({ navigation }) {
   const handleSignUp = () => {
     // data entry checks for length
     if (email.length === 0 || password.length === 0 || firstName.length === 0 || surname.length === 0) {
-      Alert.alert('Error', 'Please enter all the details');
+      Alert.alert('Error', 'Please fill all fields');
       return;
     }
 
@@ -81,9 +81,9 @@ export default function RegisterScreen({ navigation }) {
         </TouchableOpacity>
       )}
 
-      {/* touchable opacity text for members - navigate to LoginScreen */}
+      {/* Navigation to Login Screen */}
       <TouchableOpacity onPress={() => navigation.navigate("Login")} style={{ margin: 20, alignItems: "center"}}>
-        <Text style={styles.buttonText}>Already a member? Log in here</Text>
+        <Text style={styles.registerText}>Already a member? <Text style={styles.loginInLink}>Log in here</Text></Text>
       </TouchableOpacity>
     </View>
   );
@@ -108,28 +108,34 @@ const styles = StyleSheet.create({
   // Input style
   input: {
     width: '80%',
-    padding: 10,
+    padding: 5,
+    fontSize: 15,
     marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-    borderRadius: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FFFFFF',
     color: '#FFFFFF',
-    textAlign: 'center',
   },
   // Button style
   button: {
     width: '80%',
-    backgroundColor: 'transparent',
+    backgroundColor: '#FFFFFF',
     padding: 10,
     marginVertical: 10,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 5,
   },
   // Button text style
   buttonText: {
-    color: '#FFFFFF',
+    color: '#0080FF',
+    fontWeight: 'bold',
+  },
+  // Register text style
+  registerText: {
+    color: '#FFFFFF', 
+  },
+  // Login text style
+  loginInLink: {
+    color: '#FFFFFF', 
     fontWeight: 'bold',
   },
 });

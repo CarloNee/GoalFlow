@@ -60,47 +60,51 @@ export default function LoginScreen({ navigation }) {
   // return block for UI
   return (
     <View style={styles.container}>
+
       {/* GoalFlow Logo */}
-      <Image 
-        source={require('../assets/logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      {/* input fields for email and password */}
+      <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+
+      {/* Email input area */}
       <TextInput
         style={styles.input}
-        placeholderTextColor="#FFFFFF"
         placeholder="Email"
+        placeholderTextColor="#FFFFFF"
         value={email}
         onChangeText={setEmail}
+        autoCapitalize="none"
       />
+      
+      {/* Password Input Area */}
       <TextInput
         style={styles.input}
-        placeholderTextColor="#FFFFFF"
         placeholder="Password"
+        placeholderTextColor="#FFFFFF"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        autoCapitalize="none"
       />
+
+    
       {/* Login Button */}
       {loading ? (
         <ActivityIndicator size="large" color="#FFFFFF" />
       ) : (
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Log In</Text>
+          <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
       )}
 
       {/* Register Navigation Text - Touchable Opacity - navigate to register */}
       <TouchableOpacity onPress={navigateToRegister}>
-        <Text style={styles.registerText}>
-        Don't have an account? <Text style={styles.registerLink}>Register</Text>
-        </Text>
+        <Text style={styles.registerText}> Don't have an account? <Text style={styles.registerLink}>Register</Text> </Text>
       </TouchableOpacity>
+
       {/* Forgot Password Text - Touchable Opacity - email sent to user's email for password reset */}
       <TouchableOpacity onPress={navigateToPasswordReset} style={styles.passwordReset}>
         <Text style={styles.passwordResetText}>Forgot Password?</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -131,30 +135,25 @@ const styles = StyleSheet.create({
   // All input style
   input: {
     width: '80%',
-    padding: 10,
+    padding: 5,
     fontSize: 15,
     marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#FFFFFF', 
-    borderRadius: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FFFFFF',
     color: '#FFFFFF',
-    textAlign: "center",
-    
   },
   // Button style
   button: {
     width: '80%',
-    backgroundColor: 'transparent', 
+    backgroundColor: '#FFFFFF',
     padding: 10,
     marginVertical: 10,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FFFFFF', 
-    borderRadius: 20,
+    borderRadius: 5,
   },
   // Button text style
   buttonText: {
-    color: '#FFFFFF', 
+    color: '#0080FF',
     fontWeight: 'bold',
   },
   // Register text style
