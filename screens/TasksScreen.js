@@ -106,7 +106,7 @@ export default function TasksScreen({ navigation, route }) {
         // Get route parameters
         const routeParams = navigation.getState().routes.find(route => route.name === 'Tasks')?.params;
         console.log('Route Params:', routeParams);
-        
+
         // Check if a new task has been added or a task has been updated
         if (routeParams?.newTaskAdded || routeParams?.taskUpdated) {
           fetchTasks();
@@ -411,6 +411,11 @@ const onRefresh = React.useCallback(async () => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
+      ) : tasks.length === 0 ? (
+        // Display "No Tasks" when there are no notes
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No tasks...</Text>
+        </View>
       ) : (
         // If tasks, display the tasks
       <FlatList
@@ -643,5 +648,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },
+  // Empty container style
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Empty container text style
+  emptyText: {
+    fontSize: 20,
+    color: 'white',
   },
 });
