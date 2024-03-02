@@ -412,7 +412,7 @@ const onRefresh = React.useCallback(async () => {
           <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
       ) : tasks.length === 0 ? (
-        // Display "No Tasks" when there are no notes
+        // Display "No Tasks" when there are no tasks
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No tasks...</Text>
         </View>
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
   },
   // Empty container text style
   emptyText: {
-    fontSize: 20,
+    fontSize: 25,
     color: 'white',
   },
 });

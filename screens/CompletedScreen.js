@@ -172,6 +172,11 @@ export default function CompletedScreen({ navigation }) {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFFFFF" />
         </View>
+      ) : completedTasks.length === 0 ? (
+        // Display "No completed tasks" when there are no tasks
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No completed tasks...</Text>
+        </View>
       ) : (
         <FlatList
           data={completedTasks}
@@ -277,5 +282,15 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 16,
     color: "#333",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Empty container text style
+  emptyText: {
+    fontSize: 20,
+    color: '#FFFFFF',
   },
 });

@@ -185,7 +185,7 @@ export default function NotesScreen({ navigation }) {
     return (
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.noteItem}>
-          
+
           {/* Notes container */}
           <TouchableOpacity onPress={() => navigation.navigate('NoteDetail', { noteId: item.id })} style={styles.noteContentContainer}>
             {/* Notes title */}
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   // Empty container text style
   emptyText: {
-    fontSize: 20,
+    fontSize: 25,
     color: 'white',
   },
   // Note title style
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   // Note content style
   noteContent: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFFFFF',
   },
   // Action button style
   fab: {
