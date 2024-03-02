@@ -184,15 +184,22 @@ export default function NotesScreen({ navigation }) {
     // return block
     return (
       <ScrollView style={styles.scrollContainer}>
-      <View style={styles.noteItem}>
-        <TouchableOpacity onPress={() => navigation.navigate('NoteDetail', { noteId: item.id })} style={styles.noteContentContainer}>
-          <Text style={styles.noteTitle}>{trimmedTitle}</Text>
-          <Text style={styles.noteContent}>{trimmedContent}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => confirmAndDeleteNote(item.id)} style={styles.deleteIcon}>
-          <MaterialIcons name="delete-outline" size={24} color="red" />
-        </TouchableOpacity>
-      </View>
+        <View style={styles.noteItem}>
+          
+          {/* Notes container */}
+          <TouchableOpacity onPress={() => navigation.navigate('NoteDetail', { noteId: item.id })} style={styles.noteContentContainer}>
+            {/* Notes title */}
+            <Text style={styles.noteTitle}>{trimmedTitle}</Text>
+            {/* Notes content */}
+            <Text style={styles.noteContent}>{trimmedContent}</Text>
+          </TouchableOpacity>
+
+          {/* Delete section */}
+          <TouchableOpacity onPress={() => confirmAndDeleteNote(item.id)} style={styles.deleteIcon}>
+            <MaterialIcons name="delete-outline" size={24} color="red" />
+          </TouchableOpacity>
+          
+        </View>
       </ScrollView>
     );
   };
@@ -205,6 +212,7 @@ export default function NotesScreen({ navigation }) {
   // return block
   return (
     <View style={styles.container}>
+
       {/* If loading, display loading */}
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -223,10 +231,12 @@ export default function NotesScreen({ navigation }) {
           keyExtractor={(item) => item.id}
         />
       )}
+
       {/* Button to add a new note */}
       <TouchableOpacity style={styles.fab} onPress={navigateToAddNote}>
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
