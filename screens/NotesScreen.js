@@ -100,7 +100,6 @@ export default function NotesScreen({ navigation }) {
         await AsyncStorage.setItem(`notes_${userId}`, JSON.stringify(notesArr));
       } catch (error) {
         // Handle and display errors related to fetching notes
-        console.error("Error fetching notes: ", error);
         Alert.alert("Error", "An error occurred while fetching notes.");
       } finally {
         setLoading(false);
@@ -137,7 +136,6 @@ export default function NotesScreen({ navigation }) {
       // Update local state with the new notes array
       setNotes(updatedNotes);
     } catch (error) {
-      console.error("Error deleting note: ", error);
       Alert.alert("Error", "An error occurred while deleting the note.");
     }
   };

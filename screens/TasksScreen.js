@@ -105,7 +105,6 @@ export default function TasksScreen({ navigation, route }) {
   
         // Get route parameters
         const routeParams = navigation.getState().routes.find(route => route.name === 'Tasks')?.params;
-        console.log('Route Params:', routeParams);
 
         // Check if a new task has been added or a task has been updated
         if (routeParams?.newTaskAdded || routeParams?.taskUpdated) {
@@ -188,7 +187,6 @@ export default function TasksScreen({ navigation, route }) {
         await AsyncStorage.setItem(`tasks_${userId}`, JSON.stringify(fetchedTasks));
 
       } catch (error) {
-        console.error("Error fetching tasks: ", error);
         // Fall back to using AsyncStorage data in case of an error
         const storedTasks = await AsyncStorage.getItem(`tasks_${userId}`);
         if (storedTasks) {
@@ -238,7 +236,6 @@ export default function TasksScreen({ navigation, route }) {
       setShowCelebration(true); 
       setTimeout(() => setShowCelebration(false), 3000);
     } catch (error) {
-      console.error("Error completing task: ", error);
       Alert.alert("Error", "Unable to complete task.");
     }
   };
@@ -260,7 +257,6 @@ export default function TasksScreen({ navigation, route }) {
       setShowDelete(true); 
       setTimeout(() => setShowDelete(false), 3000);
     } catch (error) {
-      console.error("Error deleting task: ", error);
       Alert.alert("Error", "Unable to delete task.");
     }
   };

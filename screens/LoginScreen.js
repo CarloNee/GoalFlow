@@ -48,7 +48,6 @@ export default function LoginScreen({ navigation }) {
     })
     return viewableUser;
   } catch (error) {
-    console.log(error);
   }
   }, [navigation]);
 

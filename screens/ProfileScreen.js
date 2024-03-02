@@ -96,8 +96,7 @@ export default function ProfileScreen({ navigation }) {
       return await getDownloadURL(storageRef);
   
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert(`Error: ${error.message}`);
+      Alert.alert(`Error: Unable to upload image. Please try again`);
     }
   };
 
@@ -121,7 +120,6 @@ export default function ProfileScreen({ navigation }) {
       // Navigate to the login screen
       navigation.replace('Login');
     } catch (error) {
-      console.error('Error during logout: ', error);
       Alert.alert('Error', 'Logout failed. Please try again.');
     }
   };
@@ -154,7 +152,7 @@ export default function ProfileScreen({ navigation }) {
       navigation.replace('Login');
       // if an error yielded, catch error and display error message
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', 'Unable to process account deletion. Please try again.');
     }
   };
 
