@@ -82,7 +82,8 @@ export default function AddTaskScreen({ navigation }) {
         description,
         userId: auth.currentUser.uid,
       };
-  
+      
+      // addDoc method to add new task to the 'tasks' collection
       const docRef = await addDoc(collection(db, "tasks"), newTask);
       newTask.id = docRef.id;
   
