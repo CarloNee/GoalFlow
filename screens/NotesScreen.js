@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   // Note content style
   noteContent: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#000000',
   },
   // Action button style
   fab: {
