@@ -71,6 +71,7 @@ export default function AddNoteScreen({ navigation }) {
     setIsLoading(true);
     // try catch block
     try {
+      // new note data, title, content, time and user logged in who created the note
       const newNote = {
         title,
         content,
@@ -78,6 +79,7 @@ export default function AddNoteScreen({ navigation }) {
         userId: auth.currentUser.uid,
       };
 
+      // addDoc method to add new note to the 'notes' collection
       const docRef = await addDoc(collection(db, "notes"), newNote);
       // Set the newly created note ID
       newNote.id = docRef.id;
@@ -93,7 +95,7 @@ export default function AddNoteScreen({ navigation }) {
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
-      setIsLoading(false); // Stop loading regardless of the result
+      setIsLoading(false);
     }
   };
 
