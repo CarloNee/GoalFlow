@@ -52,6 +52,7 @@ export default function AddNoteScreen({ navigation }) {
 
   // handleSaveNote function
   const handleSaveNote = async () => {
+    // If no title / content, yield error 
     if (!title.trim() || !content.trim()) {
       Alert.alert(
         "Error",
