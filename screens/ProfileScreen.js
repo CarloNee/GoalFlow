@@ -72,7 +72,7 @@ export default function ProfileScreen({ navigation }) {
   };
 
   // function for uploading Image (async)
-  // code from firebase.js
+  // Resource coded adapted from: https://firebase.google.com/docs/storage/web/upload-files
   const uploadImageAsync = async (uri) => {
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -167,24 +167,30 @@ export default function ProfileScreen({ navigation }) {
       <StatusBar barStyle="dark-content" />
       {/* Header container */}
       <View style={styles.headerContainer}>
+        {/* User info section */}
         <View style={styles.userInfo}>
           <Text
             style={styles.name}
           >{`${profileData.firstName} ${profileData.lastName}`}</Text>
           <Text style={styles.email}>{user.email}</Text>
         </View>
+        {/* Touchable Opacity for user to press on the image and fire the handleImagePick function */}
+        {/* Pick image from user's photos collection to upload a profile image */}
         <TouchableOpacity
           onPress={handleImagePick}
           style={styles.imageContainer}
         >
+          {/* loading indicatore */}
           {isLoading ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : profileData.photoURL ? (
+            // otherwise diplay image selected
             <Image
               source={{ uri: profileData.photoURL }}
               style={styles.profileImage}
             />
           ) : (
+            // otherwise display default image if no image has been selected
             <View style={styles.profileImagePlaceholder}>
               <FontAwesome name="user-circle-o" size={60} color="grey" />
             </View>
@@ -205,8 +211,8 @@ export default function ProfileScreen({ navigation }) {
           placeholder="First Name"
         />
       </View>
+       {/* Last name input area */}
       <View style={styles.inputGroup}>
-        {/* Last name input area */}
         <Text style={styles.label}>Last Name</Text>
         <TextInput
           style={styles.input}

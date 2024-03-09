@@ -17,7 +17,7 @@ export default function NoteDetailScreen({ route, navigation }) {
   const [note, setNote] = useState({ title: '', content: '' });
 
   useEffect(() => {
-    // fetch note from the database 'notes'
+    // fetch note from the 'notes' document
     const fetchNote = async () => {
       try {
         const noteRef = doc(db, 'notes', noteId);
@@ -27,7 +27,8 @@ export default function NoteDetailScreen({ route, navigation }) {
         if (noteSnap.exists()) {
           setNote({ title: noteSnap.data().title, content: noteSnap.data().content });
           setIsEditing(true);
-          // else display error 
+
+        // else display error - note not found
         } else {
           Alert.alert('Error', 'Note not found.');
           navigation.goBack();
@@ -43,6 +44,7 @@ export default function NoteDetailScreen({ route, navigation }) {
     // Navigation - either save note or delete note icons on header top right
     navigation.setOptions({
       headerTitle: note.title,
+      // header left option - back button
       headerLeft: () => (
         <TouchableOpacity 
           onPress={() => navigation.goBack()} 
@@ -51,6 +53,7 @@ export default function NoteDetailScreen({ route, navigation }) {
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       ),
+      // header right option - two buttons. Save (handleSaveChanges) and delete (handleDeleteNote)
       headerRight: () => (
         <View style={styles.headerButtons}>
           <TouchableOpacity onPress={handleSaveChanges}>
@@ -113,21 +116,25 @@ export default function NoteDetailScreen({ route, navigation }) {
 
 // StyleSheet
 const styles = StyleSheet.create({
+  // container style
   container: {
     flex: 1,
     backgroundColor: '#FFF',
     paddingHorizontal: 20,
   },
+  // back button style
   backButton: {
     marginLeft: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 5,
   },
+  // back button text style
   backButtonText: {
     color: '#0080FF', 
     fontSize: 20,
   },
+  // input style
   input: {
     flex: 1,
     backgroundColor: '#FFF',
@@ -135,6 +142,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     padding: 10,
   },
+  // header button (save and delete) buttons style
   headerButtons: {
     flexDirection: 'row',
     margin: 10,

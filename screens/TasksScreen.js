@@ -146,6 +146,7 @@ export default function TasksScreen({ navigation, route }) {
     const headerHeight = logoHeight + 60; 
 
     navigation.setOptions({
+      // header title options (logo for goalflow in the center of the header)
       headerTitle: () => (
         <Image
           source={require('../assets/logo.png')}
@@ -168,12 +169,14 @@ export default function TasksScreen({ navigation, route }) {
 
   // Function to fetch tasks
   const fetchTasks = async () => {
+    // if user is currently auth'ed
     if (auth.currentUser) {
       setLoading(true);
       const userId = auth.currentUser.uid;
 
       try {
-        // Fetch from Firebase
+        // Fetch all tasks from firebase where the userId field in the tasks data matches the userId 
+        // dedicated for a user (generated unique for each user)
         const tasksQuery = firestoreQuery(
           collection(db, "tasks"),
           where("userId", "==", userId)

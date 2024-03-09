@@ -20,7 +20,7 @@ export default function NotesScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const screenWidth = Dimensions.get('window').width;
 
-  // if user is auth'ed, display notes
+  // if user is authorised, fetchNotes function runs
   useFocusEffect(
     React.useCallback(() => {
       if (auth.currentUser) {
@@ -32,6 +32,8 @@ export default function NotesScreen({ navigation }) {
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
+    // get users data from users database - using docRef and docSnap
+    // Resource: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
     const docRef = doc(db, "users", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -43,6 +45,7 @@ export default function NotesScreen({ navigation }) {
   React.useLayoutEffect(() => {
     fetchUserProfile();
     navigation.setOptions({
+      // header right option - profile photo
       headerRight: () => (
         profileData?.photoURL ? (
           <Image
@@ -62,6 +65,7 @@ export default function NotesScreen({ navigation }) {
   React.useLayoutEffect(() => {
 
     navigation.setOptions({
+      // header title option - text saying "Notes"
       headerTitle: () => (
         <Text style={styles.headerTitle}>Notes</Text>
       ),
@@ -110,8 +114,10 @@ export default function NotesScreen({ navigation }) {
 
   useFocusEffect(
     React.useCallback(() => {
+      // refresh notes - if in focus, and new note has been added
       const refreshNotes = navigation.addListener('focus', () => {
         const routeParams = navigation.getState().routes.find(route => route.name === 'Notes')?.params;
+        // fetch notes again for new note to be listed on the screen
         if (routeParams?.newNoteAdded) {
           fetchNotes();
           // Reset the parameter so it doesn't refetch every time
@@ -136,6 +142,7 @@ export default function NotesScreen({ navigation }) {
 
       // Update local state with the new notes array
       setNotes(updatedNotes);
+      // if error, alert that issue with deleting note
     } catch (error) {
       Alert.alert("Error", "An error occurred while deleting the note.");
     }
@@ -143,6 +150,7 @@ export default function NotesScreen({ navigation }) {
 
   // Function for confirming and deleting note
   const confirmAndDeleteNote = (noteId) => {
+    // confirmation before deleting note
     Alert.alert(
       "Delete Note",
       "Are you sure you want to delete this note?",
@@ -162,7 +170,9 @@ export default function NotesScreen({ navigation }) {
  // Function to remove a note from the cache
   const removeFromCache = async (noteId) => {
     const userId = auth.currentUser.uid;
+    // get cached notes from asyncstorage
     const cachedNotes = await AsyncStorage.getItem(`notes_${userId}`);
+    // if there are cached notes, and new note added, add new notes to cached notes array
     if (cachedNotes) {
       let notesArr = JSON.parse(cachedNotes);
       notesArr = notesArr.filter(note => note.id !== noteId);
@@ -203,7 +213,7 @@ export default function NotesScreen({ navigation }) {
     );
   };
 
-  // Function to navigate to new note using the button at the bottom
+  // Function to navigate to new note - navigate to AddNoteScreen
   const navigateToAddNote = () => {
     navigation.navigate('AddNote');
   };
