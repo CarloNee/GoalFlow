@@ -28,6 +28,7 @@ export default function LoginScreen({ navigation }) {
       .then((userCredential) => {
         const user = userCredential.user;
       })
+      // if details incorrect, yield error for incorrect username/password
       .catch((error) => {
         Alert.alert("Error", "Incorrect username/password", [{ text: "OK" }]);
       })
@@ -45,6 +46,7 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     // try catch block
     try {
+    // if user is valid, navigate to home (TasksScreen)
     const viewableUser = auth.onAuthStateChanged((valUser) =>{
       if(valUser){
         navigation.navigate("Home");
@@ -90,6 +92,7 @@ export default function LoginScreen({ navigation }) {
 
     
       {/* Login Button */}
+      {/* displaying loading if loading, otherwise display login button */}
       {loading ? (
         <ActivityIndicator size="large" color="#FFFFFF" />
       ) : (

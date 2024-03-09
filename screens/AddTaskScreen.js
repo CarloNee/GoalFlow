@@ -13,7 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 export default function AddTaskScreen({ navigation }) {
 
   // Declaration of functional components needed for AddTaskScreen
-  //   title, due date, priority, description, subtasks
+  // title, due date, priority, description, subtasks
   // Resource: https://react.dev/reference/react/useState
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState(new Date());
@@ -24,6 +24,8 @@ export default function AddTaskScreen({ navigation }) {
 
   // Function to fetch user profile data
   const fetchUserProfile = async () => {
+    // get data from firebase through docref
+    // Resource: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
     const docRef = doc(db, "users", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -35,6 +37,8 @@ export default function AddTaskScreen({ navigation }) {
   React.useLayoutEffect(() => {
     fetchUserProfile();
     navigation.setOptions({
+      // header right - to display the profile picture
+      // using photoURL from firebase
       headerRight: () => (
         profileData?.photoURL ? (
           <Image
@@ -53,6 +57,7 @@ export default function AddTaskScreen({ navigation }) {
   React.useLayoutEffect(() => {
 
     navigation.setOptions({
+      // header title - New tasks
       headerTitle: () => (
         <Text style={styles.headerTitle}>New Task</Text>
       ),
@@ -145,8 +150,8 @@ export default function AddTaskScreen({ navigation }) {
           placeholder="Description"
           value={description}
           onChangeText={setDescription}
-          multiline // Allow multiple lines
-          numberOfLines={4} // Set the initial number of lines
+          multiline 
+          numberOfLines={4} 
         />
 
         {/* Due Date Picker and Label */}

@@ -169,7 +169,9 @@ export default function CompletedScreen({ navigation }) {
   // Render function for CompletedScreen
   return (
     <View style={styles.container}>
+      {/* 3 options - display loading indicator / then if completed tasks = 0, display text or display completed tasks */}
       {loading ? (
+        // display loading indicator
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FFFFFF" />
         </View>
@@ -179,6 +181,7 @@ export default function CompletedScreen({ navigation }) {
           <Text style={styles.emptyText}>No completed tasks...</Text>
         </View>
       ) : (
+        // display the completed tasks
         <FlatList
           data={completedTasks}
           renderItem={renderCompletedTask}

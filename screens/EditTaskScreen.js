@@ -31,6 +31,7 @@ export default function EditTaskScreen({ route, navigation }) {
   React.useLayoutEffect(() => {
     fetchUserProfile();
     navigation.setOptions({
+      // header right side options (Profile Picture using photoURL from firebase)
       headerRight: () =>
         profileData?.photoURL ? (
           <Image
@@ -40,6 +41,7 @@ export default function EditTaskScreen({ route, navigation }) {
         ) : (
           <MaterialIcons name="account-circle" size={40} color="#fff" />
         ),
+        // header left side option - back button
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => navigation.navigate("Tasks")}
@@ -49,6 +51,7 @@ export default function EditTaskScreen({ route, navigation }) {
         </TouchableOpacity>
       ),
       headerRightContainerStyle: styles.headerRightContainer,
+      // header title section - edit task
       headerTitle: () => <Text style={styles.headerTitle}>Edit Task</Text>,
       headerStyle: {
         backgroundColor: "#0080FF",
@@ -65,9 +68,12 @@ export default function EditTaskScreen({ route, navigation }) {
   useEffect(() => {
     const fetchTask = async () => {
       try {
+        // get data from tasks database
+        // Resource: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
         const docRef = doc(db, "tasks", taskId);
         const docSnap = await getDoc(docRef);
-
+        
+        // if document exists, update title, priority and description
         if (docSnap.exists()) {
           const task = docSnap.data();
           setTitle(task.title);
@@ -75,12 +81,12 @@ export default function EditTaskScreen({ route, navigation }) {
           setDescription(task.description);
 
           // Convert Firestore Timestamp to JavaScript Date object
-          const firestoreDate = task.dueDate.toDate
-            ? task.dueDate.toDate()
-            : new Date(task.dueDate.seconds * 1000);
+          const firestoreDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate.seconds * 1000);
           setDueDate(firestoreDate);
         } else {
+          // if no task found in document, yield error
           Alert.alert("Error", "Task not found.");
+          // go back to tasks
           navigation.navigate("Tasks");
         }
       } catch (error) {
@@ -93,6 +99,7 @@ export default function EditTaskScreen({ route, navigation }) {
 
   // function to handle updating tasks
   const handleUpdateTask = async () => {
+    // if no title, yield error to advise to enter a title
     if (!title) {
       Alert.alert("Error", "Please enter a title for the task.");
       return;
@@ -103,6 +110,7 @@ export default function EditTaskScreen({ route, navigation }) {
       const firestoreTimestamp = Timestamp.fromDate(dueDate);
 
       const taskRef = doc(db, "tasks", taskId);
+
       // update the data in the collection
       await updateDoc(taskRef, {
         title,
@@ -111,9 +119,10 @@ export default function EditTaskScreen({ route, navigation }) {
         description,
       });
 
+      // alert user task was updated successfully
       Alert.alert("Success", "Task updated successfully.");
 
-      // Go back to TasksScreen and indicate that a task has been updated
+      // Go back to TasksScreen & update taskUpdated to true
       navigation.goBack();
       navigation.navigate("Tasks", { taskUpdated: true });
     } catch (error) {
@@ -204,10 +213,7 @@ export default function EditTaskScreen({ route, navigation }) {
         </View>
 
         {/* Update task button */}
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={handleUpdateTask}
-        >
+        <TouchableOpacity style={styles.buttonContainer} onPress={handleUpdateTask}>
           <Text style={styles.buttonText}>Update Task</Text>
         </TouchableOpacity>
       </ScrollView>

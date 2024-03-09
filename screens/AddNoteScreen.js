@@ -30,16 +30,19 @@ export default function AddNoteScreen({ navigation }) {
   useEffect(() => {
     fetchUserProfile();
     navigation.setOptions({
+      // header left back button
       headerLeft: () => (
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
           <MaterialIcons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
       ),
+      // header right save note button (using handleSaveNote function)
       headerRight: () => (
         <TouchableOpacity onPress={handleSaveNote} style={styles.headerButton}>
           <Text style={styles.headerButtonText}>Save</Text>
         </TouchableOpacity>
       ),
+      // header title section
       headerTitle: () => <Text style={styles.headerTitle}>New Note</Text>,
       headerStyle: {
         backgroundColor: "#0080FF",
@@ -88,6 +91,7 @@ export default function AddNoteScreen({ navigation }) {
       // Update AsyncStorage
       await updateAsyncStorage(newNote);
 
+      // alert if note added successfully
       Alert.alert("Success", "Note added successfully.", [
         {
           text: "OK",
@@ -97,6 +101,7 @@ export default function AddNoteScreen({ navigation }) {
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
+      // set loading to false at the end of the function running
       setIsLoading(false);
     }
   };

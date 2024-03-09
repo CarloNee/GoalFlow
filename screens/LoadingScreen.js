@@ -21,6 +21,7 @@ const LoadingScreen = () => {
     setFontsLoaded(true);
   };
 
+  // useeffect - load fonts
   useEffect(() => {
     // Load fonts
     loadFonts();
@@ -36,10 +37,10 @@ const LoadingScreen = () => {
     const timeout = setTimeout(() => {
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          // If logged in, navigate to home screen or dashboard
+          // If logged in, navigate to home screen
           navigation.replace('Home');
         } else {
-          // If not logged in, navigate to sign up screen
+          // If not logged in, navigate to login screen
           navigation.replace('Login');
         }
       });
