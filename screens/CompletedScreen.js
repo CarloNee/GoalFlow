@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function CompletedScreen({ navigation }) {
   // Declaration of functional components needed for Completed Screen
   // completed tasks and loading
+  // Resource: https://react.dev/reference/react/useState
   const [completedTasks, setCompletedTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const screenWidth = Dimensions.get('window').width;

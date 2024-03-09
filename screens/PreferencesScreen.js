@@ -6,6 +6,7 @@ import { View, StyleSheet, Text, Switch } from 'react-native';
 export default function PreferencesScreen() {
   // declaration of functional components
   // notifications enabled, light mode / dark mode
+  // Resource: https://react.dev/reference/react/useState
   const [isNotificationsEnabled, setIsNotificationsEnabled] = React.useState(false);
   const toggleSwitch = () => setIsNotificationsEnabled(previousState => !previousState);
 

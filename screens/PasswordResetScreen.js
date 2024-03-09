@@ -8,6 +8,7 @@ import { auth } from "../firebase";
 export default function PasswordResetScreen() {
   // state variables
   // email, loading - useState
+  // Resource: https://react.dev/reference/react/useState
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 

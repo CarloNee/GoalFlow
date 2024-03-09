@@ -10,6 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 export default function NoteDetailScreen({ route, navigation }) {
   // Declaration of functional components
   // noteId - route.params, content, isEditing - useState
+  // Resource: https://react.dev/reference/react/useState
   const { noteId } = route.params;
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);

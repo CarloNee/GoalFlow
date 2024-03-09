@@ -9,6 +9,7 @@ import { Picker } from "@react-native-picker/picker";
 
 // Export EditTaskScreen
 export default function EditTaskScreen({ route, navigation }) {
+  // Resource: https://react.dev/reference/react/useState
   const { taskId } = route.params;
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState(new Date());

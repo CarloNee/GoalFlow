@@ -11,6 +11,7 @@ import * as Font from "expo-font";
 // Export AddNoteScreen
 export default function AddNoteScreen({ navigation }) {
   // Declare Title, Content for Note (useState)
+  // Resource: https://react.dev/reference/react/useState
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [profileData, setProfileData] = useState(null);

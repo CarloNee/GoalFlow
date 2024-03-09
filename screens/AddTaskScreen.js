@@ -14,6 +14,7 @@ export default function AddTaskScreen({ navigation }) {
 
   // Declaration of functional components needed for AddTaskScreen
   //   title, due date, priority, description, subtasks
+  // Resource: https://react.dev/reference/react/useState
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState(new Date());
   const [priority, setPriority] = useState("None");

@@ -8,18 +8,22 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 export default function LoginScreen({ navigation }) {
   // Declare functional components
   // email, password, loading, error - all useState
+  // Resource: https://react.dev/reference/react/useState
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to handle user login
+  // Function to handle user login- making use of the signInWithEmailandPassword function from Firebase
   const handleLogin = () => {
 
     setError(null);
     setLoading(true);
 
     // signInWithEmailAndPassword from react native firebase 
+    // Code adapted from my Mobile Development Final Deliverable Project - HolidayHub Mobile App
+    // Developed September 2023 
+    // resource: https://firebase.google.com/docs/auth/web/password-auth#sign_in_a_user_with_an_email_address_and_password
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -37,7 +41,7 @@ export default function LoginScreen({ navigation }) {
     navigation.navigate('PasswordReset');
   };
 
-  // check whether the user has an account, if they do, navigate to the home screen
+  // if valid user, navigate to the TasksScreen (Home)
   useEffect(() => {
     // try catch block
     try {
@@ -51,9 +55,9 @@ export default function LoginScreen({ navigation }) {
   }
   }, [navigation]);
 
-  // function to navigate to Register Screen if user clicks on the link to Register
+  // function to navigate to RegisterScreen (Register) if user clicks on the link to Register
   const navigateToRegister = () => {
-    navigation.navigate('Register');
+    navigation.navigate("Register");
   };
 
   // return block for UI

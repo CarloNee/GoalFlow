@@ -10,6 +10,7 @@ const LoadingScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
   const auth = getAuth();
+  // Resource: https://react.dev/reference/react/useState
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   // Function to preload fonts

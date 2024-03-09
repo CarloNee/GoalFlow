@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Export NotesScreen
 export default function NotesScreen({ navigation }) {
+  // Resource: https://react.dev/reference/react/useState
   const [notes, setNotes] = useState([]);
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);

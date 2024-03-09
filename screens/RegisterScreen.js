@@ -9,6 +9,7 @@ import { db } from '../firebase';
 export default function RegisterScreen({ navigation }) {
   // Declaration of functional components
   // email, password, first name, surname, loading - useState
+  // Resource: https://react.dev/reference/react/useState
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -16,6 +17,8 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   // function to handle sign up to the application
+  // code adapted from my development of the HolidayHub app for the Mobile Development module final deliverable
+  // Developed September 2023
   const handleSignUp = () => {
     // data entry checks for length
     if (email.length === 0 || password.length === 0 || firstName.length === 0 || surname.length === 0) {
@@ -28,6 +31,7 @@ export default function RegisterScreen({ navigation }) {
     const auth = getAuth();
 
     // createUserWithEmailAndPassword from firebase
+    // Resource: https://firebase.google.com/docs/auth/web/password-auth#create_a_password-based_account
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -42,6 +46,7 @@ export default function RegisterScreen({ navigation }) {
           });
 
         // update 'users' database with first name, last name, email and profileImage set to null
+        // Resource: https://firebase.google.com/docs/firestore/manage-data/add-data#set_a_document
         setDoc(doc(db, "users", user.uid), {
           firstName: firstName,
           lastName: surname,

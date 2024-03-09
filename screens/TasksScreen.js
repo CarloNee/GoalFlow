@@ -50,6 +50,7 @@ const sortTasksByPriority = (tasks, ascending = true) => {
 export default function TasksScreen({ navigation, route }) {
 
   // states and variables declarations
+  // Resource: https://react.dev/reference/react/useState
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);

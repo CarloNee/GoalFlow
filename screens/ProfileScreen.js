@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function ProfileScreen({ navigation }) {
   // Declaration of functional components
   // user, profile data, image, is loading
+  // Resource: https://react.dev/reference/react/useState
   const user = auth.currentUser;
   const [profileData, setProfileData] = useState({ firstName: '', lastName: '', photoURL: '' });
   const [image, setImage] = useState(null);
